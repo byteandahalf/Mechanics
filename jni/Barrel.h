@@ -2,21 +2,23 @@
 #define BARREL_H_
 
 #include <mcpe.h>
-#include "Player.h"
+
+#include "Utils.h"
 
 class Barrel : public Tile
 {
 private:
 	int itemID;
-	int maxItems;
+	int itemDamage;
 	int itemsCount;
+	int maxItems;
+	int maxStackSize;
 
 public:
 	Barrel(int id);
 
 	virtual void use(Player*, int, int, int);
+	virtual void attack(Player*, int, int, int);
 
-	virtual std::string getName() const;
-	virtual std::string getDescriptionId() const;
 };
 #endif
