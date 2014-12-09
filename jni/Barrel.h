@@ -4,6 +4,7 @@
 #include <mcpe.h>
 #include <GLES/gl.h>
 #include <map>
+#include <math.h>
 
 #include "Container.h"
 #include "Utils.h"
@@ -20,7 +21,7 @@ public:
 	virtual void attack(Player*, int, int, int);
 	virtual void tick(TileSource*, int, int, int, Random*);
 	virtual void onPlace(TileSource*, int, int, int);
-	virtual void onRemove(TileSource*, int, int, int); 
+	virtual void onRemove(TileSource*, int, int, int);
 
 };
 #endif

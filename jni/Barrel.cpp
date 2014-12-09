@@ -17,6 +17,26 @@ void Barrel::onRemove(TileSource* ts, int x, int y, int z)
 {
 	Level* level = TileSource_getLevel(ts);
 	std::string id = getIdentifier(level, x, y, z);
+	Container* container = this->containers.at(id);
+	if(container == NULL)
+		return;
+
+	int stacks = ceil((float)(container->itemsCount / container->maxStackSize));
+	for(int i = 0; i < stacks; i++)
+	{
+		if(container->itemsCount >= container->maxStackSize) {
+			ItemInstance* ii = create_ItemInstance(container->itemID, container->maxStackSize, container->itemDamage);
+			dropItem(level, ii, x, y, z);
+			container->itemsCount -= container->maxStackSize;
+			continue;
+		} else if(container->itemsCount > 0) {
+			ItemInstance* ii = create_ItemInstance(container->itemID, container->itemsCount, container->itemDamage);
+			dropItem(level, ii, x, y, z);
+			container->itemsCount -= container->maxStackSize;
+			continue;
+		}
+		break;
+	}
 	this->containers.erase(id);
 }
 
@@ -121,7 +141,7 @@ void Barrel::attack(Player* player, int x, int y, int z)
 void Barrel::tick(TileSource* ts, int x, int y, int z, Random* rand)
 {
 	std::string* text = new std::string("Hello World");
-	Font_drawCached_real(g_font, text, 0, 0, g_color, false, g_material);
+	Font_draw(g_font, text, 5, 5, g_color);
 
 
 	glPushMatrix();
