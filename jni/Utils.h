@@ -12,8 +12,6 @@
 #define PLAYER_INVENTORY_OFFSET 3212
 #define PLAYER_LEVEL_OFFSET 68 // From Entity::playSound(std::string const&,float,float)
 #define LEVEL_TILE_SOURCE_OFFSET 2976
-#define LEVEL_DATA_OFFSET 2748 // Fom Level::getLevelData(void);
-#define LEVELDATA_LEVEL_NAME 84
 
 class Level;
 class LevelData;
@@ -94,6 +92,10 @@ extern void (*Entity_spawnAtLocation)(Entity*, ItemInstance*, float);
 extern Entity* (*Entity_Factory)(int, TileSource*);
 extern int (*ItemEntity_getEntityTypeId)(ItemEntity*);
 
+extern void (*Font_draw)(Font*, std::string*, float, float, Color*);
+
+extern LevelData* (*Level_getLevelData)(Level*);
+
 extern std::string (*LevelData_getLevelName)(LevelData*);
 
 extern Level* (*TileSource_getLevel)(TileSource*);
@@ -102,7 +104,6 @@ ItemInstance* getSlot(Player* player, int slot);
 
 Inventory* getInventory(Player* player);
 Level* getLevel(Player*);
-LevelData* getLevelData(Level*);
 TileSource* getTileSource(Level* level);
 
 ItemInstance* create_ItemInstance(int id, int count, int damage);

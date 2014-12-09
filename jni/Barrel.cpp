@@ -9,9 +9,7 @@ Barrel::Barrel(int id) : Tile(id, "cobblestone", &Material::wood)
 void Barrel::onPlace(TileSource* ts, int x, int y, int z)
 {
 	Level* level = TileSource_getLevel(ts);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Getted the level pointer");
 	std::string id = getIdentifier(level, x, y, z);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Getted the identifier");
 	this->containers[id] = new Container();
 }
 
@@ -120,14 +118,17 @@ void Barrel::attack(Player* player, int x, int y, int z)
 	}
 }
 
-void Barrel::animateTick(TileSource* ts, int x, int y, int z, Random* rand)
+void Barrel::tick(TileSource* ts, int x, int y, int z, Random* rand)
 {
+	std::string* text = new std::string("Hello World");
+	Font_drawCached_real(g_font, text, 0, 0, g_color, false, g_material);
+
+
 	glPushMatrix();
 
-	glTranslatef(x, y, z);
+	glTranslatef(0, 2, 0);
 	glScalef(15.0, 15.0, 15.0);
 
-	std::string* text = new std::string("Test!");
 	Font_drawCached_real(g_font, text, 0, 0, g_color, false, g_material);
 	glPopMatrix();
 }

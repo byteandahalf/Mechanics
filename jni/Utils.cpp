@@ -27,11 +27,6 @@ Level* getLevel(Player* player)
 	return (Level*) levelPtr;
 }
 
-LevelData* getLevelData(Level* level)
-{
-	void* dataPtr = *((void**) (((intptr_t) level) + LEVEL_DATA_OFFSET));
-	return (LevelData*) dataPtr;
-}
 
 int getSlotIfExistItemAndNotFull(Inventory* inv, int id, int damage, int maxStack)
 {
@@ -60,12 +55,9 @@ void dropItem(Level* level, ItemInstance* instance, float x, float y, float z)
 
 std::string getIdentifier(Level* level, int x, int y, int z)
 {
-	//Problem here!
-	LevelData* levelData = getLevelData(level);
+	LevelData* levelData = Level_getLevelData(level);
 	std::stringstream temp;
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Pass the LevelData");
 	temp.str(LevelData_getLevelName(levelData).c_str());
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Pass the getLevelName");
 	temp << x;
 	temp << y;
 	temp << z;

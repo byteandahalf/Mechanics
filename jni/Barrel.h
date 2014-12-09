@@ -18,7 +18,7 @@ public:
 
 	virtual void use(Player*, int, int, int);
 	virtual void attack(Player*, int, int, int);
-	virtual void animateTick(TileSource*, int, int, int, Random*);
+	virtual void tick(TileSource*, int, int, int, Random*);
 	virtual void onPlace(TileSource*, int, int, int);
 	virtual void onRemove(TileSource*, int, int, int); 
 
