@@ -37,3 +37,17 @@ int getSlotIfExistItemAndNotFull(Inventory* inv, int id, int damage, int maxStac
 	}
 	return -1;
 }
+
+TileSource* getTileSource(Level* level)
+{
+	void* tileSource = *((void**) (((intptr_t) level) + LEVEL_TILE_SOURCE_OFFSET));
+	return (TileSource*) tileSource;
+}
+
+void dropItem(Level* level, ItemInstance* instance, float x, float y, float z)
+{
+	TileSource* tileSource = getTileSource(level);
+	ItemEntity* ie = (ItemEntity*)Entity_Factory(64, tileSource);
+	Entity_setPos(ie, x, y, z);
+	Entity_spawnAtLocation(ie, instance, 0);
+}

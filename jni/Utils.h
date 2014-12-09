@@ -10,17 +10,15 @@
 #define LOG_TAG "StorageEX"
 #define PLAYER_INVENTORY_OFFSET 3212
 #define PLAYER_LEVEL_OFFSET 68 // From Entity::playSound(std::string const&,float,float)
+#define LEVEL_TILE_SOURCE_OFFSET 2976
 
 class Level;
 class Font;
-class Color
-{
-	float r;
-	float g;
-	float b;
-	float a;
-};
 class MaterialPtr;
+class TileSource;
+
+class Entity {};
+class ItemEntity : public Entity {};
 
 class FillingContainer {};
 
@@ -39,6 +37,28 @@ public:
 	bool wtf4; //19
 };
 
+class Vec3{
+public:
+	float x;
+	float y;
+	float z;
+};
+
+class TilePos{
+public:
+	int x;
+	int y;
+	int z;
+};
+
+class Color
+{
+public:
+	float r;
+	float g;
+	float b;
+	float a;
+};
 
 extern void (*FillingContainer_replaceSlot)(FillingContainer*, int, ItemInstance*);
 extern int (*FillingContainer_getSlotWithItem)(FillingContainer*, ItemInstance*);
@@ -63,10 +83,20 @@ extern MaterialPtr* g_material;
 
 extern void (*Font_drawCached_real)(Font*, std::string const&, float, float, Color const&, bool, MaterialPtr*);
 
+extern void (*Level_addEntity)(Level*, Entity*);
+
+extern void (*Entity_setPos)(Entity*, float, float, float);
+extern void (*Entity_spawnAtLocation)(Entity*, ItemInstance*, float);
+extern Entity* (*Entity_Factory)(int, TileSource*);
+extern int (*ItemEntity_getEntityTypeId)(ItemEntity*);
+
 ItemInstance* getSlot(Player* player, int slot);
 Inventory* getInventory(Player* player);
 Level* getLevel(Player*);
+TileSource* getTileSource(Level* level);
 ItemInstance* create_ItemInstance(int id, int count, int damage);
 int getSlotIfExistItemAndNotFull(Inventory* inv, int id, int damage, int maxStack);
+void dropItem(Level*, ItemInstance*, float, float, float);
+
 
 #endif

@@ -2,6 +2,7 @@
 
 Barrel::Barrel(int id) : Tile(id, "cobblestone", &Material::wood) {
 	this->itemID = 0;
+	this->itemsCount = 0;
 	this->setDestroyTime(0.5);
 	this->setTicking(true);
 }
@@ -17,13 +18,13 @@ void Barrel::use(Player* player, int x, int y, int z)
 	}
 
 	Inventory* inv = getInventory(player);
-	if(this->itemID == 0 && ItemInstance_isStackable(instance)) {
+	if(this->itemID == 0 && id != 0 && ItemInstance_isStackable(instance)) {
 		this->itemID = id;
 		this->maxStackSize = ItemInstance_getMaxStackSize(instance);
 		this->maxItems =  this->maxStackSize * 36;
 		this->itemsCount = 0;
 		this->itemDamage = instance->damage;
-	} else if (this->itemID != id) {
+	} else if (this->itemID != id && this->itemsCount > 0) {
 		int slott = getSlotIfExistItemAndNotFull(inv, this->itemID, this->itemDamage, this->maxStackSize);
 		if(slott >= 0) { // If there is a satck of the item
 			ItemInstance* ret = FillingContainer_getItem(inv, slott);
@@ -36,9 +37,12 @@ void Barrel::use(Player* player, int x, int y, int z)
 			ii = NULL;
 
 		} else { // If player full drop it in the floor
-			//TODO: Drop item if player is full
-			//Level* level = getLevel(player);
-			//ItemInstance* ii = create_ItemInstance(this->itemID, 1, this->itemDamage);
+			Level* level = getLevel(player);
+			ItemInstance* ii = create_ItemInstance(this->itemID, 1, this->itemDamage);
+			dropItem(level, ii, x, y, z);
+			
+			level = NULL;
+			ii = NULL;
 		}
 		this->itemsCount -= 1;
 		return;
@@ -68,36 +72,37 @@ void Barrel::attack(Player* player, int x, int y, int z)
 {
 	Inventory* inv = getInventory(player);
 	if(this->itemsCount >= this->maxStackSize) {
+		ItemInstance* ii = create_ItemInstance(this->itemID, this->maxStackSize, this->itemDamage);
 		if(FillingContainer_getFreeSlot(inv) > 0) {
-			this->itemsCount -= this->maxStackSize;
-			ItemInstance* ii = create_ItemInstance(this->itemID, this->maxStackSize, this->itemDamage);
 			FillingContainer_addItem(inv, ii);
-			ii = NULL;
 		} else {
-			//TODO: Drop item to the floor
+			Level* level = getLevel(player);
+			dropItem(level, ii, x, y, z);
+			level = NULL;
 		}
-	} else {
+		ii = NULL;
+		this->itemsCount -= this->maxStackSize;
+	} else if(this->itemsCount > 0) {
+		ItemInstance* ii = create_ItemInstance(this->itemID, this->itemsCount, this->itemDamage);
 		if(FillingContainer_getFreeSlot(inv) > 0) {
-			ItemInstance* ii = create_ItemInstance(this->itemID, this->itemsCount, this->itemDamage);
 			FillingContainer_addItem(inv, ii);
-			this->itemsCount = 0;
-			ii = NULL;
 		} else {
-			//TODO: Drop item to the floor
+			Level* level = getLevel(player);
+			dropItem(level, ii, x, y, z);
+			level = NULL;
 		}
+		ii = NULL;
+		this->itemsCount = 0;
 	}
 }
 
-void Barrel::animateTick(TileSource* ts, int x, int y, int z, Random*)
+void Barrel::animateTick(TileSource* ts, int x, int y, int z, Random* rand)
 {
+	// glPushMatrix();
 
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "tested!");
-	glMatrixMode(GL_PROJECTION);
-	// move the camera 1 units to the left
-	glTranslatef(x, y + 2, z);
+	// glTranslatef(0, 2, 0);
+	// glScalef(15.0, 15.0, 15.0);
 
-	Font_drawCached_real(g_font, "Test!",0, 0, g_color, false, g_material);
-
-	glMatrixMode(GL_MODELVIEW);
-	// restore 
+	// Font_drawCached_real(g_font, "Test!", 0, 0, g_color, false, g_material);
+	// glPopMatrix();
 }

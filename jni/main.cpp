@@ -28,6 +28,13 @@ bool (*ItemInstance_isStackable)(ItemInstance*);
 
 void (*Font_drawCached_real)(Font*, std::string const&, float, float, Color const&, bool, MaterialPtr*);
 
+void (*Level_addEntity)(Level*, Entity*);
+
+void (*Entity_setPos)(Entity*, float, float, float);
+void (*Entity_spawnAtLocation)(Entity*, ItemInstance*, float);
+Entity* (*Entity_Factory)(int, TileSource*);
+int (*ItemEntity_getEntityTypeId)(ItemEntity*);
+
 static void (*Tile_initTiles_real)();
 
 const int barrelTileId = 201;
@@ -73,6 +80,13 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	FillingContainer_getSlotWithItem = (int (*) (FillingContainer*, ItemInstance*)) dlsym(RTLD_DEFAULT, "_ZN16FillingContainer25getSlotWithRemainingSpaceERK12ItemInstance");
 
 	Inventory_getSelected = (int (*) (Inventory*)) dlsym(RTLD_DEFAULT, "_ZN9Inventory11getSelectedEv");
+
+	Level_addEntity = (void (*) (Level*, Entity*)) dlsym(RTLD_DEFAULT, "_ZN5Level9addEntityEP6Entity");
+
+	Entity_Factory = (Entity* (*) (int, TileSource*)) dlsym(RTLD_DEFAULT, "_ZN13EntityFactory12CreateEntityEiR10TileSource");
+	ItemEntity_getEntityTypeId = (int (*) (ItemEntity*)) dlsym(RTLD_DEFAULT, "_ZNK10ItemEntity15getEntityTypeIdEv");
+	Entity_spawnAtLocation = (void (*) (Entity*, ItemInstance*, float)) dlsym(RTLD_DEFAULT, "_ZN6Entity15spawnAtLocationERK12ItemInstancef");
+	Entity_setPos = (void (*) (Entity*, float, float, float)) dlsym(RTLD_DEFAULT, "_ZN6Entity6setPosEfff");
 
 	MSHookFunction((void*) &Tile::initTiles, (void*) &Tile_initTiles_hook, (void**) &Tile_initTiles_real);
 	return JNI_VERSION_1_2;
