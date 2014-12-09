@@ -2,6 +2,7 @@
 #define UTILS_H_
 
 #include <mcpe.h>
+#include <sstream>
 #include <stdlib.h>
 #include <stdint.h>
 #include <android/log.h>
@@ -11,8 +12,11 @@
 #define PLAYER_INVENTORY_OFFSET 3212
 #define PLAYER_LEVEL_OFFSET 68 // From Entity::playSound(std::string const&,float,float)
 #define LEVEL_TILE_SOURCE_OFFSET 2976
+#define LEVEL_DATA_OFFSET 2748 // Fom Level::getLevelData(void);
+#define LEVELDATA_LEVEL_NAME 84
 
 class Level;
+class LevelData;
 class Font;
 class MaterialPtr;
 class TileSource;
@@ -78,25 +82,34 @@ extern int (*ItemInstance_getMaxStackSize)(ItemInstance*);
 extern bool (*ItemInstance_isStackable)(ItemInstance*);
 
 extern Font* g_font;
-extern Color g_color;
+extern Color* g_color;
 extern MaterialPtr* g_material;
 
-extern void (*Font_drawCached_real)(Font*, std::string const&, float, float, Color const&, bool, MaterialPtr*);
+extern void (*Font_drawCached_real)(Font*, std::string*, float, float, Color*, bool, MaterialPtr*);
 
-extern void (*Level_addEntity)(Level*, Entity*);
+//extern void (*Level_addEntity)(Level*, Entity*);
 
 extern void (*Entity_setPos)(Entity*, float, float, float);
 extern void (*Entity_spawnAtLocation)(Entity*, ItemInstance*, float);
 extern Entity* (*Entity_Factory)(int, TileSource*);
 extern int (*ItemEntity_getEntityTypeId)(ItemEntity*);
 
+extern std::string (*LevelData_getLevelName)(LevelData*);
+
+extern Level* (*TileSource_getLevel)(TileSource*);
+
 ItemInstance* getSlot(Player* player, int slot);
+
 Inventory* getInventory(Player* player);
 Level* getLevel(Player*);
+LevelData* getLevelData(Level*);
 TileSource* getTileSource(Level* level);
+
 ItemInstance* create_ItemInstance(int id, int count, int damage);
 int getSlotIfExistItemAndNotFull(Inventory* inv, int id, int damage, int maxStack);
 void dropItem(Level*, ItemInstance*, float, float, float);
+
+std::string getIdentifier(Level*, int, int, int);
 
 
 #endif

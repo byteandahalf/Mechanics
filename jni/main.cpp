@@ -26,23 +26,27 @@ int (*ItemInstance_getID)(ItemInstance*);
 int (*ItemInstance_getMaxStackSize)(ItemInstance*);
 bool (*ItemInstance_isStackable)(ItemInstance*);
 
-void (*Font_drawCached_real)(Font*, std::string const&, float, float, Color const&, bool, MaterialPtr*);
+void (*Font_drawCached_real)(Font*, std::string*, float, float, Color*, bool, MaterialPtr*);
 
-void (*Level_addEntity)(Level*, Entity*);
+//void (*Level_addEntity)(Level*, Entity*);
 
 void (*Entity_setPos)(Entity*, float, float, float);
 void (*Entity_spawnAtLocation)(Entity*, ItemInstance*, float);
 Entity* (*Entity_Factory)(int, TileSource*);
 int (*ItemEntity_getEntityTypeId)(ItemEntity*);
 
+std::string (*LevelData_getLevelName)(LevelData*);
+
+Level* (*TileSource_getLevel)(TileSource*);
+
 static void (*Tile_initTiles_real)();
 
 const int barrelTileId = 201;
 Font* g_font;
-Color g_color;
+Color* g_color;
 MaterialPtr* g_material;
 
-void Font_drawCached_hook(Font* font, std::string const& textStr, float xOffset, float yOffset, Color const& color, bool isShadow, MaterialPtr* material)
+void Font_drawCached_hook(Font* font, std::string* textStr, float xOffset, float yOffset, Color* color, bool isShadow, MaterialPtr* material)
 {
 	g_font = font;
 	g_color = color;
@@ -62,7 +66,7 @@ static void Tile_initTiles_hook() {
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
 	void* fontDrawCached = dlsym(RTLD_DEFAULT, "_ZN4Font10drawCachedERKSsffRK5ColorbP11MaterialPtr");
-	MSHookFunction(fontDrawCached, (void*) &Font_drawCached_hook, (void**) &Font_drawCached_real);
+	MSHookFunction((void*) fontDrawCached, (void*) &Font_drawCached_hook, (void**) &Font_drawCached_real);
 
 	Player_getCarriedItem = (ItemInstance* (*) (Player*)) dlsym(RTLD_DEFAULT, "_ZN6Player14getCarriedItemEv");
 
@@ -81,12 +85,16 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
 	Inventory_getSelected = (int (*) (Inventory*)) dlsym(RTLD_DEFAULT, "_ZN9Inventory11getSelectedEv");
 
-	Level_addEntity = (void (*) (Level*, Entity*)) dlsym(RTLD_DEFAULT, "_ZN5Level9addEntityEP6Entity");
+	//Level_addEntity = (void (*) (Level*, Entity*)) dlsym(RTLD_DEFAULT, "_ZN5Level9addEntityEP6Entity");
 
 	Entity_Factory = (Entity* (*) (int, TileSource*)) dlsym(RTLD_DEFAULT, "_ZN13EntityFactory12CreateEntityEiR10TileSource");
 	ItemEntity_getEntityTypeId = (int (*) (ItemEntity*)) dlsym(RTLD_DEFAULT, "_ZNK10ItemEntity15getEntityTypeIdEv");
 	Entity_spawnAtLocation = (void (*) (Entity*, ItemInstance*, float)) dlsym(RTLD_DEFAULT, "_ZN6Entity15spawnAtLocationERK12ItemInstancef");
 	Entity_setPos = (void (*) (Entity*, float, float, float)) dlsym(RTLD_DEFAULT, "_ZN6Entity6setPosEfff");
+
+	LevelData_getLevelName = (std::string (*) (LevelData*))  dlsym(RTLD_DEFAULT, "_ZN9LevelData12getLevelNameEv");
+
+	TileSource_getLevel = (Level* (*) (TileSource*)) dlsym(RTLD_DEFAULT, "_ZNK10TileSource8getLevelEv");
 
 	MSHookFunction((void*) &Tile::initTiles, (void*) &Tile_initTiles_hook, (void**) &Tile_initTiles_real);
 	return JNI_VERSION_1_2;

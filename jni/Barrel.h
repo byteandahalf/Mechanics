@@ -3,17 +3,15 @@
 
 #include <mcpe.h>
 #include <GLES/gl.h>
+#include <map>
 
+#include "Container.h"
 #include "Utils.h"
 
 class Barrel : public Tile
 {
 private:
-	int itemID;
-	int itemDamage;
-	int itemsCount;
-	int maxItems;
-	int maxStackSize;
+	std::map<std::string, Container*> containers;
 
 public:
 	Barrel(int id);
@@ -21,6 +19,8 @@ public:
 	virtual void use(Player*, int, int, int);
 	virtual void attack(Player*, int, int, int);
 	virtual void animateTick(TileSource*, int, int, int, Random*);
+	virtual void onPlace(TileSource*, int, int, int);
+	virtual void onRemove(TileSource*, int, int, int); 
 
 };
 #endif
