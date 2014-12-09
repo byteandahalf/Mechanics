@@ -12,6 +12,15 @@
 #define PLAYER_LEVEL_OFFSET 68 // From Entity::playSound(std::string const&,float,float)
 
 class Level;
+class Font;
+class Color
+{
+	float r;
+	float g;
+	float b;
+	float a;
+};
+class MaterialPtr;
 
 class FillingContainer {};
 
@@ -48,6 +57,11 @@ extern int (*ItemInstance_getID)(ItemInstance*);
 extern int (*ItemInstance_getMaxStackSize)(ItemInstance*);
 extern bool (*ItemInstance_isStackable)(ItemInstance*);
 
+extern Font* g_font;
+extern Color g_color;
+extern MaterialPtr* g_material;
+
+extern void (*Font_drawCached_real)(Font*, std::string const&, float, float, Color const&, bool, MaterialPtr*);
 
 ItemInstance* getSlot(Player* player, int slot);
 Inventory* getInventory(Player* player);

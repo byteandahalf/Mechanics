@@ -3,6 +3,7 @@
 Barrel::Barrel(int id) : Tile(id, "cobblestone", &Material::wood) {
 	this->itemID = 0;
 	this->setDestroyTime(0.5);
+	this->setTicking(true);
 }
 
 void Barrel::use(Player* player, int x, int y, int z)
@@ -85,4 +86,18 @@ void Barrel::attack(Player* player, int x, int y, int z)
 			//TODO: Drop item to the floor
 		}
 	}
+}
+
+void Barrel::animateTick(TileSource* ts, int x, int y, int z, Random*)
+{
+
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "tested!");
+	glMatrixMode(GL_PROJECTION);
+	// move the camera 1 units to the left
+	glTranslatef(x, y + 2, z);
+
+	Font_drawCached_real(g_font, "Test!",0, 0, g_color, false, g_material);
+
+	glMatrixMode(GL_MODELVIEW);
+	// restore 
 }

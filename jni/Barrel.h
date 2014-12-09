@@ -2,6 +2,7 @@
 #define BARREL_H_
 
 #include <mcpe.h>
+#include <GLES/gl.h>
 
 #include "Utils.h"
 
@@ -19,6 +20,7 @@ public:
 
 	virtual void use(Player*, int, int, int);
 	virtual void attack(Player*, int, int, int);
+	virtual void animateTick(TileSource*, int, int, int, Random*);
 
 };
 #endif

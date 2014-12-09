@@ -26,11 +26,22 @@ int (*ItemInstance_getID)(ItemInstance*);
 int (*ItemInstance_getMaxStackSize)(ItemInstance*);
 bool (*ItemInstance_isStackable)(ItemInstance*);
 
-std::map <std::string, std::string>* bl_I18n_strings;
-
-const int barrelTileId = 201;
+void (*Font_drawCached_real)(Font*, std::string const&, float, float, Color const&, bool, MaterialPtr*);
 
 static void (*Tile_initTiles_real)();
+
+const int barrelTileId = 201;
+Font* g_font;
+Color g_color;
+MaterialPtr* g_material;
+
+void Font_drawCached_hook(Font* font, std::string const& textStr, float xOffset, float yOffset, Color const& color, bool isShadow, MaterialPtr* material)
+{
+	g_font = font;
+	g_color = color;
+	g_material = material;
+	Font_drawCached_real(font, textStr, xOffset, yOffset, color, isShadow, material);
+}
 
 static void Tile_initTiles_hook() {
 	Tile_initTiles_real();
@@ -42,7 +53,9 @@ static void Tile_initTiles_hook() {
 }
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
-	bl_I18n_strings = (std::map <std::string, std::string> *) dlsym(RTLD_DEFAULT, "_ZN4I18n8_stringsE");
+
+	void* fontDrawCached = dlsym(RTLD_DEFAULT, "_ZN4Font10drawCachedERKSsffRK5ColorbP11MaterialPtr");
+	MSHookFunction(fontDrawCached, (void*) &Font_drawCached_hook, (void**) &Font_drawCached_real);
 
 	Player_getCarriedItem = (ItemInstance* (*) (Player*)) dlsym(RTLD_DEFAULT, "_ZN6Player14getCarriedItemEv");
 

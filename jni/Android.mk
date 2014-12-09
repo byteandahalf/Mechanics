@@ -21,7 +21,7 @@ LOCAL_SRC_FILES := main.cpp Barrel.cpp Utils.cpp
 # search for libraries in the jni/ folder of our project,
 # link to the libraries for printing to logcat, getting methods from libminecraftpe,
 # and for accessing BlockLauncher functions
-LOCAL_LDLIBS    := -L$(LOCAL_PATH) -llog -ldl -lminecraftpe -lmcpelauncher_tinysubstrate
+LOCAL_LDLIBS    := -L$(LOCAL_PATH) -llog -ldl -lminecraftpe -lmcpelauncher_tinysubstrate -lGLESv1_CM
 
 # ignore undefined symbols.
 # workaround for method not found errors.
