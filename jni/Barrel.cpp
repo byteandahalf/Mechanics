@@ -21,21 +21,17 @@ void Barrel::onRemove(TileSource* ts, int x, int y, int z)
 	if(container == NULL)
 		return;
 
-	int stacks = ceil((float)(container->itemsCount / container->maxStackSize));
-	for(int i = 0; i < stacks; i++)
+	while(container->itemsCount > 0)
 	{
 		if(container->itemsCount >= container->maxStackSize) {
 			ItemInstance* ii = create_ItemInstance(container->itemID, container->maxStackSize, container->itemDamage);
 			dropItem(level, ii, x, y, z);
 			container->itemsCount -= container->maxStackSize;
-			continue;
 		} else if(container->itemsCount > 0) {
 			ItemInstance* ii = create_ItemInstance(container->itemID, container->itemsCount, container->itemDamage);
 			dropItem(level, ii, x, y, z);
-			container->itemsCount -= container->maxStackSize;
-			continue;
+			container->itemsCount -= container->itemsCount;
 		}
-		break;
 	}
 	this->containers.erase(id);
 }
@@ -94,7 +90,7 @@ void Barrel::use(Player* player, int x, int y, int z)
 		container->itemsCount += (instance->count - i);
 
 		ItemInstance* ii = create_ItemInstance(container->itemID, i, container->itemDamage);
-		FillingContainer_setItem(inv, slot, ii);
+		FillingContainer_replaceSlot(inv, slot, ii);
 		ii = NULL;
 	} else {
 		container->itemsCount += instance->count;
