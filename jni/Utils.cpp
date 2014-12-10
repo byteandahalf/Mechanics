@@ -48,9 +48,9 @@ TileSource* getTileSource(Level* level)
 void dropItem(Level* level, ItemInstance* instance, float x, float y, float z)
 {
 	TileSource* tileSource = getTileSource(level);
-	ItemEntity* ie = (ItemEntity*)Entity_Factory(64, tileSource);
-	Entity_setPos(ie, x, y, z);
-	Entity_spawnAtLocation(ie, instance, 0);
+	ItemEntity* retval = (ItemEntity*) ::operator new((std::size_t) 332);
+	ItemEntity_ItemEntity(retval, tileSource, x, y, z, instance);
+	Level_addEntity(level, retval);
 }
 
 std::string getIdentifier(Level* level, int x, int y, int z)
@@ -58,6 +58,7 @@ std::string getIdentifier(Level* level, int x, int y, int z)
 	LevelData* levelData = Level_getLevelData(level);
 	std::stringstream temp;
 	temp.str(LevelData_getLevelName(levelData).c_str());
+	temp << ":";
 	temp << x;
 	temp << y;
 	temp << z;

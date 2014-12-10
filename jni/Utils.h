@@ -85,7 +85,7 @@ extern MaterialPtr* g_material;
 
 extern void (*Font_drawCached_real)(Font*, std::string*, float, float, Color*, bool, MaterialPtr*);
 
-//extern void (*Level_addEntity)(Level*, Entity*);
+extern void (*Level_addEntity)(Level*, Entity*);
 
 extern void (*Entity_setPos)(Entity*, float, float, float);
 extern void (*Entity_spawnAtLocation)(Entity*, ItemInstance*, float);
@@ -100,6 +100,7 @@ extern std::string (*LevelData_getLevelName)(LevelData*);
 
 extern Level* (*TileSource_getLevel)(TileSource*);
 
+extern void (*ItemEntity_ItemEntity)(ItemEntity*, TileSource*, float, float, float, ItemInstance*);
 ItemInstance* getSlot(Player* player, int slot);
 
 Inventory* getInventory(Player* player);

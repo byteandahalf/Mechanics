@@ -28,7 +28,7 @@ bool (*ItemInstance_isStackable)(ItemInstance*);
 
 void (*Font_drawCached_real)(Font*, std::string*, float, float, Color*, bool, MaterialPtr*);
 
-//void (*Level_addEntity)(Level*, Entity*);
+void (*Level_addEntity)(Level*, Entity*);
 
 void (*Entity_setPos)(Entity*, float, float, float);
 void (*Entity_spawnAtLocation)(Entity*, ItemInstance*, float);
@@ -42,6 +42,8 @@ std::string (*LevelData_getLevelName)(LevelData*);
 Level* (*TileSource_getLevel)(TileSource*);
 
 void (*Font_draw)(Font*, std::string*, float, float, Color*);
+
+void (*ItemEntity_ItemEntity)(ItemEntity*, TileSource*, float, float, float, ItemInstance*);
 
 static void (*Tile_initTiles_real)();
 
@@ -91,7 +93,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
 	Inventory_getSelected = (int (*) (Inventory*)) dlsym(RTLD_DEFAULT, "_ZN9Inventory11getSelectedEv");
 
-	//Level_addEntity = (void (*) (Level*, Entity*)) dlsym(RTLD_DEFAULT, "_ZN5Level9addEntityEP6Entity");
+	Level_addEntity = (void (*) (Level*, Entity*)) dlsym(RTLD_DEFAULT, "_ZN5Level9addEntityEP6Entity");
 
 	Entity_Factory = (Entity* (*) (int, TileSource*)) dlsym(RTLD_DEFAULT, "_ZN13EntityFactory12CreateEntityEiR10TileSource");
 	ItemEntity_getEntityTypeId = (int (*) (ItemEntity*)) dlsym(RTLD_DEFAULT, "_ZNK10ItemEntity15getEntityTypeIdEv");
@@ -103,6 +105,9 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	Level_getLevelData = (LevelData* (*) (Level*)) dlsym(RTLD_DEFAULT, "_ZN5Level12getLevelDataEv");
 
 	TileSource_getLevel = (Level* (*) (TileSource*)) dlsym(RTLD_DEFAULT, "_ZNK10TileSource8getLevelEv");
+
+	//ItemEnity Size 332,  Player::drop(ItemInstance const*, bool)
+	ItemEntity_ItemEntity = (void (*) (ItemEntity*, TileSource*, float, float, float, ItemInstance*)) dlsym(RTLD_DEFAULT, "_ZN10ItemEntityC2ER10TileSourcefffRK12ItemInstance");
 
 	MSHookFunction((void*) &Tile::initTiles, (void*) &Tile_initTiles_hook, (void**) &Tile_initTiles_real);
 	return JNI_VERSION_1_2;
