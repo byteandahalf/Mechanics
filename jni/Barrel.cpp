@@ -45,59 +45,55 @@ void Barrel::use(Player* player, int x, int y, int z)
 		return;
 
 	ItemInstance* instance = Player_getCarriedItem(player);
-	int id;
-	if(instance == NULL) {
-		id = 0;
-	} else {
-		id = ItemInstance_getID(instance);
-	}
-
-	Inventory* inv = getInventory(player);
-	if(container->itemID == 0 && id != 0 && ItemInstance_isStackable(instance)) {
-		container->itemID = id;
+	if(container->itemID == 0 && instance != NULL && ItemInstance_isStackable(instance)) {
+		container->itemID = ItemInstance_getID(instance);
 		container->maxStackSize = ItemInstance_getMaxStackSize(instance);
 		container->maxItems =  container->maxStackSize * 36;
-		container->itemsCount = 0;
 		container->itemDamage = instance->damage;
-	} else if (container->itemID != id && container->itemsCount > 0) {
-		int slott = getSlotIfExistItemAndNotFull(inv, container->itemID, container->itemDamage, container->maxStackSize);
-		if(slott >= 0) { // If there is a satck of the item
-			ItemInstance* ret = FillingContainer_getItem(inv, slott);
-			ret->count += 1;
-			FillingContainer_replaceSlot(inv, slott, ret);
-			ret = NULL;
-		} else if(FillingContainer_getFreeSlot(inv) > 0) { // If the player have space add the item to the player
-			ItemInstance* ii = create_ItemInstance(container->itemID, 1, container->itemDamage);
-			FillingContainer_addItem(inv, ii);
-			ii = NULL;
-
-		} else { // If player full drop it in the floor
-			ItemInstance* ii = create_ItemInstance(container->itemID, 1, container->itemDamage);
-			dropItem(level, ii, x, y, z);
-
-			level = NULL;
-			ii = NULL;
-		}
-		container->itemsCount -= 1;
-		return;
-	}
-
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Put item inside the barrel: ItemInstance(%d, %d, %d) Barrel(%d, %d, %d, %d)", id, instance->damage, instance->count, container->itemID, container->itemsCount, container->itemDamage, container->maxItems);
-
-	int slot = ((int*) inv)[10]; // From BlockLauncher Sources
-	if(container->itemsCount + instance->count > container->maxItems) {
-		int i = (container->itemsCount + instance->count) - container->maxItems;
-		container->itemsCount += (instance->count - i);
-
-		ItemInstance* ii = create_ItemInstance(container->itemID, i, container->itemDamage);
-		FillingContainer_replaceSlot(inv, slot, ii);
-		ii = NULL;
-	} else {
 		container->itemsCount += instance->count;
-		FillingContainer_clearSlot(inv, slot);
-	}
 
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Barrel: ItemInstance(%d, %d, %d) Barrel(%d, %d, %d, %d)", id, instance->damage, instance->count, container->itemID, container->itemsCount, container->itemDamage, container->maxItems);
+		Inventory* inv = getInventory(player);
+		int slot = ((int*) inv)[10]; // From BlockLauncher
+		FillingContainer_clearSlot(inv, slot);
+
+#if DEBUG
+		__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Inserted item to barrel!. Barrel Container(ID = %d, Damage = %d, MaxStackSize = %d, MaxItems = %d)", container->itemID, container->itemDamage, container->maxStackSize, container->maxItems);
+#endif
+	} else if(instance == NULL && container->itemsCount > 0) {
+		Inventory* inv = getInventory(player);
+		int slot = getSlotIfExistItemAndNotFull(inv, container->itemID, container->itemDamage, container->maxStackSize);
+		if(slot >= 0) { //If player have stack of the item incomplete
+			ItemInstance* retval = FillingContainer_getItem(inv, slot); 
+			retval->count += 1;
+			container->itemsCount -= 1;
+		} else if(FillingContainer_getFreeSlot(inv) > 0) { // if player have some space free
+			ItemInstance* itemInstance = create_ItemInstance(container->itemID, 1, container->itemDamage);
+			FillingContainer_addItem(inv, itemInstance);
+			container->itemsCount -= itemInstance->count;
+		} else { // Drop Item to the floor.
+			ItemInstance* itemInstance = create_ItemInstance(container->itemID, 1, container->itemDamage);
+			Level* level = getLevel(player);
+			dropItem(level, itemInstance, x, y, z);
+		}
+	} else if((ItemInstance_getID(instance) == container->itemID) && 
+					(instance->damage == container->itemDamage)   && 
+					(container->itemsCount > 0) 				  && 
+					(container->itemsCount < container->maxItems))   {
+
+		Inventory* inv = getInventory(player);
+		int slot = ((int*) inv)[10]; // From BlockLauncher
+
+		ItemInstance* itemInstance = FillingContainer_getItem(inv, slot);
+		if((container->itemsCount + itemInstance->count) > container->maxItems)
+		{
+			int i = (container->itemsCount + instance->count) - container->maxItems;
+			itemInstance->count = i;
+			container->itemsCount += (instance->count - i);
+		} else {
+			container->itemsCount += instance->count;
+			FillingContainer_clearSlot(inv, slot);
+		}
+	}
 }
 
 

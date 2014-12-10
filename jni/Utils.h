@@ -8,6 +8,7 @@
 #include <android/log.h>
 
 
+#define DEBUG 1
 #define LOG_TAG "StorageEX"
 #define PLAYER_INVENTORY_OFFSET 3212
 #define PLAYER_LEVEL_OFFSET 68 // From Entity::playSound(std::string const&,float,float)
@@ -20,7 +21,10 @@ class MaterialPtr;
 class TileSource;
 
 class Entity {};
-class ItemEntity : public Entity {};
+class ItemEntity : public Entity {
+public:
+	void** vtable;
+};
 
 class FillingContainer {};
 
