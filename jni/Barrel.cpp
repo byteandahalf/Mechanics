@@ -74,6 +74,7 @@ void Barrel::use(Player* player, int x, int y, int z)
 			ItemInstance* itemInstance = create_ItemInstance(container->itemID, 1, container->itemDamage);
 			Level* level = getLevel(player);
 			dropItem(level, itemInstance, x, y, z);
+			container->itemsCount -= itemInstance->count;
 		}
 	} else if((ItemInstance_getID(instance) == container->itemID) && 
 					(instance->damage == container->itemDamage)   && 
