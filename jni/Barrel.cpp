@@ -6,6 +6,16 @@ Barrel::Barrel(int id) : Tile(id, "cobblestone", &Material::wood)
 	this->setTicking(true);
 }
 
+int Barrel::getColor(TileSource*, int, int, int)
+{
+	return 0xff763500;
+}
+
+int Barrel::getColor(int idk)
+{
+	return 0xff763500;
+}
+
 void Barrel::onPlace(TileSource* ts, int x, int y, int z)
 {
 	Level* level = TileSource_getLevel(ts);
@@ -17,17 +27,17 @@ void Barrel::onRemove(TileSource* ts, int x, int y, int z)
 {
 	Level* level = TileSource_getLevel(ts);
 	std::string id = getIdentifier(level, x, y, z);
-	Container* container = this->containers.at(id);
+	Container* container = this->containers[id];
 	if(container == NULL)
 		return;
 
-	while(container->itemsCount > 0)
+	while(container->itemsCount > 0 && container->itemID != 0)
 	{
 		if(container->itemsCount >= container->maxStackSize) {
 			ItemInstance* ii = create_ItemInstance(container->itemID, container->maxStackSize, container->itemDamage);
 			dropItem(level, ii, x, y, z);
 			container->itemsCount -= container->maxStackSize;
-		} else if(container->itemsCount > 0) {
+		} else {
 			ItemInstance* ii = create_ItemInstance(container->itemID, container->itemsCount, container->itemDamage);
 			dropItem(level, ii, x, y, z);
 			container->itemsCount -= container->itemsCount;
@@ -40,7 +50,7 @@ void Barrel::use(Player* player, int x, int y, int z)
 {
 	Level* level = getLevel(player);
 	std::string ident = getIdentifier(level, x, y, z);
-	Container* container = this->containers.at(ident);
+	Container* container = this->containers[ident];
 	if(container == NULL)
 		return;
 
@@ -74,12 +84,13 @@ void Barrel::use(Player* player, int x, int y, int z)
 			ItemInstance* itemInstance = create_ItemInstance(container->itemID, 1, container->itemDamage);
 			Level* level = getLevel(player);
 			dropItem(level, itemInstance, x, y, z);
-			container->itemsCount -= itemInstance->count;
+			container->itemsCount -= 1;
 		}
-	} else if((ItemInstance_getID(instance) == container->itemID) && 
-					(instance->damage == container->itemDamage)   && 
-					(container->itemsCount > 0) 				  && 
-					(container->itemsCount < container->maxItems))   {
+	} else if(instance != NULL && 
+			 (instance->damage == container->itemDamage)   && 
+			 (container->itemsCount > 0) 				   && 
+			 (container->itemsCount < container->maxItems) &&
+			 (ItemInstance_getID(instance) == container->itemID))   {
 
 		Inventory* inv = getInventory(player);
 		int slot = ((int*) inv)[10]; // From BlockLauncher
@@ -104,7 +115,7 @@ void Barrel::attack(Player* player, int x, int y, int z)
 	Level* level = getLevel(player);
 	std::string id = getIdentifier(level, x, y, z);
 	Container* container = this->containers.at(id);
-	if(container == NULL)
+	if(container == NULL || container->itemID == 0)
 		return;
 
 	Inventory* inv = getInventory(player);
@@ -133,15 +144,15 @@ void Barrel::attack(Player* player, int x, int y, int z)
 
 void Barrel::tick(TileSource* ts, int x, int y, int z, Random* rand)
 {
-	std::string* text = new std::string("Hello World");
-	Font_draw(g_font, text, 5, 5, g_color);
+	// std::string* text = new std::string("Hello World");
+	// Font_draw(g_font, text, 5, 5, g_color);
 
 
-	glPushMatrix();
+	// glPushMatrix();
 
-	glTranslatef(0, 2, 0);
-	glScalef(15.0, 15.0, 15.0);
+	// glTranslatef(0, 2, 0);
+	// glScalef(15.0, 15.0, 15.0);
 
-	Font_drawCached_real(g_font, text, 0, 0, g_color, false, g_material);
-	glPopMatrix();
+	// Font_drawCached_real(g_font, text, 0, 0, g_color, false, g_material);
+	// glPopMatrix();
 }

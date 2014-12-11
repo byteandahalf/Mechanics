@@ -56,6 +56,9 @@ void dropItem(Level* level, ItemInstance* instance, float x, float y, float z)
 std::string getIdentifier(Level* level, int x, int y, int z)
 {
 	LevelData* levelData = Level_getLevelData(level);
+	if(levelData == NULL)
+		return "";
+
 	std::stringstream temp;
 	temp.str(LevelData_getLevelName(levelData).c_str());
 	temp << ":";

@@ -22,6 +22,8 @@ public:
 	virtual void tick(TileSource*, int, int, int, Random*);
 	virtual void onPlace(TileSource*, int, int, int);
 	virtual void onRemove(TileSource*, int, int, int);
+	virtual int getColor(TileSource*, int, int, int);
+	virtual int getColor(int);
 
 };
 #endif
