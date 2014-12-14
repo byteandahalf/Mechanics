@@ -30,6 +30,7 @@ void (*Font_drawCached_real)(Font*, std::string*, float, float, Color*, bool, Ma
 
 void (*Level_addEntity)(Level*, Entity*);
 
+void (*Entity_setSize)(Entity*, float, float);
 void (*Entity_setPos)(Entity*, float, float, float);
 void (*Entity_spawnAtLocation)(Entity*, ItemInstance*, float);
 Entity* (*Entity_Factory)(int, TileSource*);
@@ -99,6 +100,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	ItemEntity_getEntityTypeId = (int (*) (ItemEntity*)) dlsym(RTLD_DEFAULT, "_ZNK10ItemEntity15getEntityTypeIdEv");
 	Entity_spawnAtLocation = (void (*) (Entity*, ItemInstance*, float)) dlsym(RTLD_DEFAULT, "_ZN6Entity15spawnAtLocationERK12ItemInstancef");
 	Entity_setPos = (void (*) (Entity*, float, float, float)) dlsym(RTLD_DEFAULT, "_ZN6Entity6setPosEfff");
+	Entity_setSize = (void (*) (Entity*, float, float)) dlsym(RTLD_DEFAULT, " _ZN6Entity7setSizeEff");
 
 	LevelData_getLevelName = (std::string (*) (LevelData*))  dlsym(RTLD_DEFAULT, "_ZN9LevelData12getLevelNameEv");
 

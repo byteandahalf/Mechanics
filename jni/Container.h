@@ -9,6 +9,7 @@ public:
 	int itemsCount;
 	int maxItems;
 	int maxStackSize;
+	bool locked;
 
 public:
 	Container();

@@ -4,6 +4,7 @@ Barrel::Barrel(int id) : Tile(id, "cobblestone", &Material::wood)
 {
 	this->setDestroyTime(0.5);
 	this->setTicking(true);
+	//this->itemEntity = (ItemEntity*) ::operator new((std::size_t) 332);
 }
 
 int Barrel::getColor(TileSource*, int, int, int)
@@ -66,6 +67,20 @@ void Barrel::use(Player* player, int x, int y, int z)
 		int slot = ((int*) inv)[10]; // From BlockLauncher
 		FillingContainer_clearSlot(inv, slot);
 
+ /*Trying to render the block inside the barrel
+		ItemInstance* retInst = create_ItemInstance(container->itemID, 1, container->itemDamage);
+		this->itemEntity->vtable[ENTITY_ISPICKABLE] = (void*)&Entity_isPickable;
+		this->itemEntity->vtable[ENTITY_PLAYERTOUCH] = (void*)&Entity_playerTouch;
+		ItemEntity_ItemEntity(this->itemEntity, getTileSource(level), x, y, z, retInst);
+		this->itemEntity->vtable[ENTITY_ISPICKABLE] = (void*)&Entity_isPickable;
+		this->itemEntity->vtable[ENTITY_PLAYERTOUCH] = (void*)&Entity_playerTouch;
+		bl_dumpVtable(this->itemEntity->vtable, 84 * 4);
+		//Entity_setPos(this->itemEntity, (float)(x+2), y, z);
+		//Entity_setSize(this->itemEntity, 10.0, 10.0);
+		Level_addEntity(level, this->itemEntity);
+
+*/
+		
 #if DEBUG
 		__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Inserted item to barrel!. Barrel Container(ID = %d, Damage = %d, MaxStackSize = %d, MaxItems = %d)", container->itemID, container->itemDamage, container->maxStackSize, container->maxItems);
 #endif
@@ -105,6 +120,15 @@ void Barrel::use(Player* player, int x, int y, int z)
 			container->itemsCount += instance->count;
 			FillingContainer_clearSlot(inv, slot);
 		}
+	}
+
+	if(container->itemsCount <= 0  && container->locked == false)
+	{
+		container->itemID = 0;
+		container->maxStackSize = 0;
+		container->maxItems =  0;
+		container->itemDamage = 0;
+		container->itemsCount = 0;
 	}
 }
 

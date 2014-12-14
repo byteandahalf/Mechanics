@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <android/log.h>
+#include <dlfcn.h>
+#include <map>
 
 
 #define DEBUG 1
@@ -13,12 +15,27 @@
 #define PLAYER_INVENTORY_OFFSET 3212
 #define PLAYER_LEVEL_OFFSET 68 // From Entity::playSound(std::string const&,float,float)
 #define LEVEL_TILE_SOURCE_OFFSET 2976
+#define ENTITY_ISPICKABLE 41
+#define ENTITY_PLAYERTOUCH 38
 
 class Level;
 class LevelData;
 class Font;
 class MaterialPtr;
 class TileSource;
+
+class Tag {
+  void** vtable;
+  int errorState;
+  std::string name;
+  char filler[8];
+};
+
+typedef std::map<std::basic_string<char>, Tag*, std::less<std::basic_string<char> >, std::allocator<std::pair<const std::basic_string<char>, Tag*> > > TagMap;
+
+class CompoundTag : public Tag{
+    TagMap tags;
+};
 
 class Entity {};
 class ItemEntity : public Entity {
@@ -91,6 +108,7 @@ extern void (*Font_drawCached_real)(Font*, std::string*, float, float, Color*, b
 
 extern void (*Level_addEntity)(Level*, Entity*);
 
+extern void (*Entity_setSize)(Entity*, float, float);
 extern void (*Entity_setPos)(Entity*, float, float, float);
 extern void (*Entity_spawnAtLocation)(Entity*, ItemInstance*, float);
 extern Entity* (*Entity_Factory)(int, TileSource*);
@@ -117,5 +135,10 @@ void dropItem(Level*, ItemInstance*, float, float, float);
 
 std::string getIdentifier(Level*, int, int, int);
 
+bool Entity_isPickable(Entity*);
+void Entity_playerTouch(Entity* ent, Player* player);
+bool Entity_checkInTile(Entity*, float, float, float);
+
+void bl_dumpVtable(void** vtable, size_t size);
 
 #endif

@@ -13,6 +13,7 @@ class Barrel : public Tile
 {
 private:
 	std::map<std::string, Container*> containers;
+	//ItemEntity* itemEntity;
 
 public:
 	Barrel(int id);

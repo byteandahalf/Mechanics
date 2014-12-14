@@ -67,3 +67,25 @@ std::string getIdentifier(Level* level, int x, int y, int z)
 	temp << z;
 	return temp.str();
 }
+
+bool Entity_isPickable(Entity* ent)
+{
+	return false;
+}
+
+void Entity_playerTouch(Entity* ent, Player* player)
+{
+	return; // Do Nothing
+}
+
+void bl_dumpVtable(void** vtable, size_t size) {
+	// thanks, MrARM
+	Dl_info info;
+	for (int i = 0; i < (size / sizeof(void*)); i++) {
+		if (!dladdr(vtable[i], &info)) {
+			__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "BLANK // %d", i);
+		} else {
+			__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "%s; // %d", info.dli_sname, i);
+		}
+	}
+}
