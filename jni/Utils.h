@@ -8,7 +8,7 @@
 #include <android/log.h>
 #include <dlfcn.h>
 #include <map>
-
+#include "Container.h"
 
 #define DEBUG 1
 #define LOG_TAG "StorageEX"
@@ -18,6 +18,11 @@
 #define ENTITY_ISPICKABLE 41
 #define ENTITY_PLAYERTOUCH 38
 
+#define TAG_BYTE 1
+#define TAG_INT 3
+#define TAG_STRING 8
+#define TAG_COMPOUND 10
+
 class Level;
 class LevelData;
 class Font;
@@ -25,6 +30,7 @@ class MaterialPtr;
 class TileSource;
 
 class Tag {
+public:
   void** vtable;
   int errorState;
   std::string name;
@@ -34,9 +40,25 @@ class Tag {
 typedef std::map<std::basic_string<char>, Tag*, std::less<std::basic_string<char> >, std::allocator<std::pair<const std::basic_string<char>, Tag*> > > TagMap;
 
 class CompoundTag : public Tag{
+public:
     TagMap tags;
 };
 
+class IntTag : public Tag {
+public:
+	int value;
+};
+
+class ByteTag : public Tag{
+public:
+	char value;
+};
+
+class StringTag : public Tag {
+public:
+	char filler[4];
+	std::string value; //12?
+};
 class Entity {};
 class ItemEntity : public Entity {
 public:
@@ -83,6 +105,16 @@ public:
 	float a;
 };
 
+extern void (*Tag_Tag)(Tag*, std::string const&);
+extern Tag* (*Tag_newTag)(Tag*, char, std::string const&);
+
+extern CompoundTag* (*CompoundTag_copy)(CompoundTag*);
+extern int (*CompoundTag_getID) (CompoundTag*);
+extern void (*CompoundTag_put)(CompoundTag*, std::string const&, Tag*);
+extern void (*CompoundTag_putInt)(CompoundTag*, std::string const&, int);
+extern void (*CompoundTag_putByte)(CompoundTag*, std::string const&, char);
+extern void (*CompoundTag_putString)(CompoundTag*, std::string const&, std::string const&);
+
 extern void (*FillingContainer_replaceSlot)(FillingContainer*, int, ItemInstance*);
 extern int (*FillingContainer_getSlotWithItem)(FillingContainer*, ItemInstance*);
 extern int (*FillingContainer_getFreeSlot)(FillingContainer*);
@@ -117,12 +149,20 @@ extern int (*ItemEntity_getEntityTypeId)(ItemEntity*);
 extern void (*Font_draw)(Font*, std::string*, float, float, Color*);
 
 extern LevelData* (*Level_getLevelData)(Level*);
+extern void (*LevelData_setTagData)(LevelData*, CompoundTag*);
+extern Tag* (*LevelData_getTagData)(LevelData*, CompoundTag*);
 
 extern std::string (*LevelData_getLevelName)(LevelData*);
 
 extern Level* (*TileSource_getLevel)(TileSource*);
 
 extern void (*ItemEntity_ItemEntity)(ItemEntity*, TileSource*, float, float, float, ItemInstance*);
+
+extern void** CompoundTag_vtable;
+extern void** ByteTag_vtable;
+extern void** IntTag_vtable;
+extern void** StringTag_vtable;
+
 ItemInstance* getSlot(Player* player, int slot);
 
 Inventory* getInventory(Player* player);
@@ -138,6 +178,10 @@ std::string getIdentifier(Level*, int, int, int);
 bool Entity_isPickable(Entity*);
 void Entity_playerTouch(Entity* ent, Player* player);
 bool Entity_checkInTile(Entity*, float, float, float);
+
+Tag* newTag(char, std::string);
+
+void saveContainers(Level*, std::map<std::string, Container*>);
 
 void bl_dumpVtable(void** vtable, size_t size);
 

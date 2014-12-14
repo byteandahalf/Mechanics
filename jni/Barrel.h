@@ -11,7 +11,7 @@
 
 class Barrel : public Tile
 {
-private:
+public:
 	std::map<std::string, Container*> containers;
 	//ItemEntity* itemEntity;
 

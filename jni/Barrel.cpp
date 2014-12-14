@@ -5,6 +5,8 @@ Barrel::Barrel(int id) : Tile(id, "cobblestone", &Material::wood)
 	this->setDestroyTime(0.5);
 	this->setTicking(true);
 	//this->itemEntity = (ItemEntity*) ::operator new((std::size_t) 332);
+
+	//newTag(TAG_INT, "Something");
 }
 
 int Barrel::getColor(TileSource*, int, int, int)
@@ -21,7 +23,7 @@ void Barrel::onPlace(TileSource* ts, int x, int y, int z)
 {
 	Level* level = TileSource_getLevel(ts);
 	std::string id = getIdentifier(level, x, y, z);
-	this->containers[id] = new Container();
+	this->containers[id] = new Container(LevelData_getLevelName(Level_getLevelData(level)), x, y, z);
 }
 
 void Barrel::onRemove(TileSource* ts, int x, int y, int z)
@@ -130,6 +132,8 @@ void Barrel::use(Player* player, int x, int y, int z)
 		container->itemDamage = 0;
 		container->itemsCount = 0;
 	}
+
+	//saveContainers(level, this->containers);
 }
 
 
