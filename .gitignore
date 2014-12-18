@@ -28,3 +28,9 @@ proguard/
 *.log
 
 *.bat
+
+*.tags
+*.tags_sorted_by_file
+*.dmp
+*.sublime-workspace
+*.sublime-project

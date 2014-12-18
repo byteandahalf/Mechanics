@@ -1,12 +1,9 @@
 #include "Barrel.h"
 
-Barrel::Barrel(int id) : Tile(id, "cobblestone", &Material::wood) 
+Barrel::Barrel(int id) : EntityTile(id, "cobblestone", &Material::wood) 
 {
 	this->setDestroyTime(0.5);
 	this->setTicking(true);
-	//this->itemEntity = (ItemEntity*) ::operator new((std::size_t) 332);
-
-	//newTag(TAG_INT, "Something");
 }
 
 int Barrel::getColor(TileSource*, int, int, int)
@@ -32,7 +29,10 @@ void Barrel::onRemove(TileSource* ts, int x, int y, int z)
 	std::string id = getIdentifier(level, x, y, z);
 	Container* container = this->containers[id];
 	if(container == NULL)
-		return;
+	{
+		container = new Container(LevelData_getLevelName(Level_getLevelData(level)), x, y, z);
+		this->containers[id] = container;
+	}
 
 	while(container->itemsCount > 0 && container->itemID != 0)
 	{
@@ -55,7 +55,12 @@ void Barrel::use(Player* player, int x, int y, int z)
 	std::string ident = getIdentifier(level, x, y, z);
 	Container* container = this->containers[ident];
 	if(container == NULL)
-		return;
+	{
+		container = new Container(LevelData_getLevelName(Level_getLevelData(level)), x, y, z);
+		this->containers[ident] = container;
+	}
+
+	Entity_setPos((Entity*) player, 0, 5, 0);
 
 	ItemInstance* instance = Player_getCarriedItem(player);
 	if(container->itemID == 0 && instance != NULL && ItemInstance_isStackable(instance)) {
@@ -68,20 +73,6 @@ void Barrel::use(Player* player, int x, int y, int z)
 		Inventory* inv = getInventory(player);
 		int slot = ((int*) inv)[10]; // From BlockLauncher
 		FillingContainer_clearSlot(inv, slot);
-
- /*Trying to render the block inside the barrel
-		ItemInstance* retInst = create_ItemInstance(container->itemID, 1, container->itemDamage);
-		this->itemEntity->vtable[ENTITY_ISPICKABLE] = (void*)&Entity_isPickable;
-		this->itemEntity->vtable[ENTITY_PLAYERTOUCH] = (void*)&Entity_playerTouch;
-		ItemEntity_ItemEntity(this->itemEntity, getTileSource(level), x, y, z, retInst);
-		this->itemEntity->vtable[ENTITY_ISPICKABLE] = (void*)&Entity_isPickable;
-		this->itemEntity->vtable[ENTITY_PLAYERTOUCH] = (void*)&Entity_playerTouch;
-		bl_dumpVtable(this->itemEntity->vtable, 84 * 4);
-		//Entity_setPos(this->itemEntity, (float)(x+2), y, z);
-		//Entity_setSize(this->itemEntity, 10.0, 10.0);
-		Level_addEntity(level, this->itemEntity);
-
-*/
 		
 #if DEBUG
 		__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Inserted item to barrel!. Barrel Container(ID = %d, Damage = %d, MaxStackSize = %d, MaxItems = %d)", container->itemID, container->itemDamage, container->maxStackSize, container->maxItems);
@@ -132,8 +123,6 @@ void Barrel::use(Player* player, int x, int y, int z)
 		container->itemDamage = 0;
 		container->itemsCount = 0;
 	}
-
-	//saveContainers(level, this->containers);
 }
 
 
@@ -144,7 +133,10 @@ void Barrel::attack(Player* player, int x, int y, int z)
 	std::string id = getIdentifier(level, x, y, z);
 	Container* container = this->containers.at(id);
 	if(container == NULL || container->itemID == 0)
-		return;
+	{
+		container = new Container(LevelData_getLevelName(Level_getLevelData(level)), x, y, z);
+		this->containers[id] = container;
+	}
 
 	Inventory* inv = getInventory(player);
 	if(container->itemsCount >= container->maxStackSize) {
@@ -170,17 +162,10 @@ void Barrel::attack(Player* player, int x, int y, int z)
 	}
 }
 
+void Barrel::animateTick(TileSource* ts, int x, int y, int z, Random* rand)
+{}
+
+
 void Barrel::tick(TileSource* ts, int x, int y, int z, Random* rand)
 {
-	// std::string* text = new std::string("Hello World");
-	// Font_draw(g_font, text, 5, 5, g_color);
-
-
-	// glPushMatrix();
-
-	// glTranslatef(0, 2, 0);
-	// glScalef(15.0, 15.0, 15.0);
-
-	// Font_drawCached_real(g_font, text, 0, 0, g_color, false, g_material);
-	// glPopMatrix();
 }

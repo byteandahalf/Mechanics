@@ -60,7 +60,7 @@ std::string getIdentifier(Level* level, int x, int y, int z)
 		return "";
 
 	std::stringstream temp;
-	temp.str(LevelData_getLevelName(levelData));
+	temp << LevelData_getLevelName(levelData).c_str();
 	temp << ":";
 	temp << x;
 	temp << y;
@@ -78,42 +78,14 @@ void Entity_playerTouch(Entity* ent, Player* player)
 	return; // Do Nothing
 }
 
-Tag* newTag(char id, std::string name)
-{
-	Tag* temp;
-	if(id == TAG_COMPOUND) {
-		temp = (Tag*) malloc(0x25);
-		Tag_Tag(temp, name);
-		temp->vtable = CompoundTag_vtable;
-		return temp;
-	} else if (id == TAG_INT) {
-		temp = (Tag*) malloc(0x11);
-		Tag_Tag(temp, name);
-		temp->vtable = IntTag_vtable;
-		return temp;
-	} else if(id == TAG_BYTE) {
-		temp = (Tag*) malloc(0x11);
-		Tag_Tag(temp, name);
-		temp->vtable = ByteTag_vtable;
-		return temp;
-	}
-	else if(id == TAG_STRING) {
-		temp = (Tag*) malloc(0x15);
-		Tag_Tag(temp, name);
-		temp->vtable = StringTag_vtable;
-		return temp;
-	}
-	return NULL;
-}
-
 void bl_dumpVtable(void** vtable, size_t size) {
 	// thanks, MrARM
 	Dl_info info;
 	for (int i = 0; i < (size / sizeof(void*)); i++) {
 		if (!dladdr(vtable[i], &info)) {
-			__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "BLANK // %d", i);
+			__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "BLANK // %d", i);
 		} else {
-			__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "%s; // %d", info.dli_sname, i);
+			__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "%s; // %d", info.dli_sname, i);
 		}
 	}
 }

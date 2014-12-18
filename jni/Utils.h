@@ -37,11 +37,9 @@ public:
   char filler[8];
 };
 
-typedef std::map<std::basic_string<char>, Tag*, std::less<std::basic_string<char> >, std::allocator<std::pair<const std::basic_string<char>, Tag*> > > TagMap;
-
 class CompoundTag : public Tag{
 public:
-    TagMap tags;
+    std::map<std::string, Tag*> tags;
 };
 
 class IntTag : public Tag {
@@ -56,7 +54,6 @@ public:
 
 class StringTag : public Tag {
 public:
-	char filler[4];
 	std::string value; //12?
 };
 class Entity {};
@@ -146,7 +143,7 @@ extern void (*Entity_spawnAtLocation)(Entity*, ItemInstance*, float);
 extern Entity* (*Entity_Factory)(int, TileSource*);
 extern int (*ItemEntity_getEntityTypeId)(ItemEntity*);
 
-extern void (*Font_draw)(Font*, std::string*, float, float, Color*);
+extern void (*Font_draw)(Font*, std::string const&, float, float, Color*);
 
 extern LevelData* (*Level_getLevelData)(Level*);
 extern void (*LevelData_setTagData)(LevelData*, CompoundTag*);
@@ -157,11 +154,6 @@ extern std::string (*LevelData_getLevelName)(LevelData*);
 extern Level* (*TileSource_getLevel)(TileSource*);
 
 extern void (*ItemEntity_ItemEntity)(ItemEntity*, TileSource*, float, float, float, ItemInstance*);
-
-extern void** CompoundTag_vtable;
-extern void** ByteTag_vtable;
-extern void** IntTag_vtable;
-extern void** StringTag_vtable;
 
 ItemInstance* getSlot(Player* player, int slot);
 
@@ -178,8 +170,6 @@ std::string getIdentifier(Level*, int, int, int);
 bool Entity_isPickable(Entity*);
 void Entity_playerTouch(Entity* ent, Player* player);
 bool Entity_checkInTile(Entity*, float, float, float);
-
-Tag* newTag(char, std::string);
 
 void saveContainers(Level*, std::map<std::string, Container*>);
 

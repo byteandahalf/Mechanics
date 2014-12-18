@@ -1,19 +1,17 @@
 #ifndef BARREL_H_
 #define BARREL_H_
 
-#include <mcpe.h>
-#include <GLES/gl.h>
 #include <map>
 #include <math.h>
 
 #include "Container.h"
 #include "Utils.h"
+#include "EntityTile.h"
 
-class Barrel : public Tile
+class Barrel : public EntityTile
 {
 public:
 	std::map<std::string, Container*> containers;
-	//ItemEntity* itemEntity;
 
 public:
 	Barrel(int id);
@@ -21,6 +19,7 @@ public:
 	virtual void use(Player*, int, int, int);
 	virtual void attack(Player*, int, int, int);
 	virtual void tick(TileSource*, int, int, int, Random*);
+	virtual void animateTick(TileSource*, int, int, int, Random*); // 24
 	virtual void onPlace(TileSource*, int, int, int);
 	virtual void onRemove(TileSource*, int, int, int);
 	virtual int getColor(TileSource*, int, int, int);
