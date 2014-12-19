@@ -60,8 +60,6 @@ void Barrel::use(Player* player, int x, int y, int z)
 		this->containers[ident] = container;
 	}
 
-	Entity_setPos((Entity*) player, 0, 5, 0);
-
 	ItemInstance* instance = Player_getCarriedItem(player);
 	if(container->itemID == 0 && instance != NULL && ItemInstance_isStackable(instance)) {
 		container->itemID = ItemInstance_getID(instance);
@@ -160,12 +158,4 @@ void Barrel::attack(Player* player, int x, int y, int z)
 		ii = NULL;
 		container->itemsCount = 0;
 	}
-}
-
-void Barrel::animateTick(TileSource* ts, int x, int y, int z, Random* rand)
-{}
-
-
-void Barrel::tick(TileSource* ts, int x, int y, int z, Random* rand)
-{
 }

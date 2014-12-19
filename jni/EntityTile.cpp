@@ -31,14 +31,4 @@ TileEntity* EntityTile::newTileEntity(TilePos const& pos)
 }
 
 
-void EntityTile::initEntityTile()
-{
-	_EntityTile$newTileEntity = (TileEntity* (*) (EntityTile*, TilePos const&)) dlsym(RTLD_DEFAULT, "_ZN10EntityTile13newTileEntityERK7TilePos");
-	_EntityTile$neighborChanged = (void (*)(EntityTile*, TileSource*, int, int, int, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN10EntityTile15neighborChangedEP10TileSourceiiiiii");
-	_EntityTile$triggerEvent = (void (*) (EntityTile*, TileSource *,int, int, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN10EntityTile12triggerEventEP10TileSourceiiiii");
-
-	//_EntityTile$EntityTile = (void (*) (EntityTile*, int, std::string const&, Material*)) dlsym(RTLD_DEFAULT, "_ZN10EntityTileC2EiRKSsPK8Material");
-	//_EntityTile$EntityTile = (void (*) (EntityTile*, int, Material*)) dlsym(RTLD_DEFAULT, "_ZN10EntityTileC2EiPK8Material");
-}
-
 //236

@@ -102,25 +102,12 @@ public:
 	float a;
 };
 
-extern void (*Tag_Tag)(Tag*, std::string const&);
-extern Tag* (*Tag_newTag)(Tag*, char, std::string const&);
-
-extern CompoundTag* (*CompoundTag_copy)(CompoundTag*);
-extern int (*CompoundTag_getID) (CompoundTag*);
-extern void (*CompoundTag_put)(CompoundTag*, std::string const&, Tag*);
-extern void (*CompoundTag_putInt)(CompoundTag*, std::string const&, int);
-extern void (*CompoundTag_putByte)(CompoundTag*, std::string const&, char);
-extern void (*CompoundTag_putString)(CompoundTag*, std::string const&, std::string const&);
-
 extern void (*FillingContainer_replaceSlot)(FillingContainer*, int, ItemInstance*);
-extern int (*FillingContainer_getSlotWithItem)(FillingContainer*, ItemInstance*);
 extern int (*FillingContainer_getFreeSlot)(FillingContainer*);
 extern int (*FillingContainer_clearSlot)(FillingContainer*, int);
 extern ItemInstance* (*FillingContainer_getItem)(FillingContainer*, int);
 extern void (*FillingContainer_addItem)(FillingContainer*, ItemInstance*);
 extern void (*FillingContainer_setItem)(FillingContainer*, int, ItemInstance*);
-
-extern int (*Inventory_getSelected)(Inventory*);
 
 extern ItemInstance* (*Player_getCarriedItem)(Player*);
 
@@ -130,18 +117,10 @@ extern int (*ItemInstance_getMaxStackSize)(ItemInstance*);
 extern bool (*ItemInstance_isStackable)(ItemInstance*);
 
 extern Font* g_font;
-extern Color* g_color;
-extern MaterialPtr* g_material;
-
-extern void (*Font_drawCached_real)(Font*, std::string*, float, float, Color*, bool, MaterialPtr*);
 
 extern void (*Level_addEntity)(Level*, Entity*);
 
-extern void (*Entity_setSize)(Entity*, float, float);
 extern void (*Entity_setPos)(Entity*, float, float, float);
-extern void (*Entity_spawnAtLocation)(Entity*, ItemInstance*, float);
-extern Entity* (*Entity_Factory)(int, TileSource*);
-extern int (*ItemEntity_getEntityTypeId)(ItemEntity*);
 
 extern void (*Font_draw)(Font*, std::string const&, float, float, Color*);
 
@@ -167,11 +146,6 @@ void dropItem(Level*, ItemInstance*, float, float, float);
 
 std::string getIdentifier(Level*, int, int, int);
 
-bool Entity_isPickable(Entity*);
-void Entity_playerTouch(Entity* ent, Player* player);
-bool Entity_checkInTile(Entity*, float, float, float);
-
-void saveContainers(Level*, std::map<std::string, Container*>);
 
 void bl_dumpVtable(void** vtable, size_t size);
 
