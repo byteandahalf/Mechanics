@@ -1,6 +1,6 @@
 #include "Barrel.h"
 
-Barrel::Barrel(int id) : EntityTile(id, "cobblestone", &Material::wood) 
+Barrel::Barrel(int id) : Tile(id, "cobblestone", &Material::wood)
 {
 	this->setDestroyTime(0.5);
 	this->setTicking(true);
@@ -30,8 +30,7 @@ void Barrel::onRemove(TileSource* ts, int x, int y, int z)
 	Container* container = this->containers[id];
 	if(container == NULL)
 	{
-		container = new Container(LevelData_getLevelName(Level_getLevelData(level)), x, y, z);
-		this->containers[id] = container;
+		return;
 	}
 
 	while(container->itemsCount > 0 && container->itemID != 0)

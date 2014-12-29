@@ -8,6 +8,8 @@
 #include <android/log.h>
 #include <dlfcn.h>
 #include <map>
+
+#include "NBT/CompoundTag.h"
 #include "Container.h"
 
 #define DEBUG 1
@@ -29,43 +31,15 @@ class Font;
 class MaterialPtr;
 class TileSource;
 
-class Tag {
-public:
-  void** vtable;
-  int errorState;
-  std::string name;
-  char filler[8];
-};
-
-class CompoundTag : public Tag{
-public:
-    std::map<std::string, Tag*> tags;
-};
-
-class IntTag : public Tag {
-public:
-	int value;
-};
-
-class ByteTag : public Tag{
-public:
-	char value;
-};
-
-class StringTag : public Tag {
-public:
-	std::string value; //12?
-};
 class Entity {};
 class ItemEntity : public Entity {
 public:
-	void** vtable;
 };
 
 class FillingContainer {};
 
 class Inventory : public FillingContainer {};
-	
+
 class ItemInstance
 {
 public:

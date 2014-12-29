@@ -9,9 +9,6 @@ class TileEntity;
 
 class EntityTile : public Tile
 {
-public:
-	void** vtable;
-
 	
 public:
 	EntityTile(int, Material*);

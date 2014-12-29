@@ -3,12 +3,13 @@
 
 #include <map>
 #include <math.h>
+#include <mcpe.h>
 
 #include "Container.h"
 #include "Utils.h"
-#include "EntityTile.h"
 
-class Barrel : public EntityTile
+
+class Barrel : public Tile
 {
 public:
 	std::map<std::string, Container*> containers;

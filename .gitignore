@@ -34,3 +34,8 @@ proguard/
 *.dmp
 *.sublime-workspace
 *.sublime-project
+
+*.classpath
+*.cproject
+*.project
+.settings/

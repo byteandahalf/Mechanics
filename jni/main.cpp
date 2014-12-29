@@ -7,8 +7,15 @@
 #include <map>
 
 #include "Barrel.h"
+#include "NBT/CompoundTag.h"
+#include "NBT/IntTag.h"
+#include "NBT/ByteTag.h"
+#include "NBT/StringTag.h"
 #include "Utils.h"
 
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__))
+
+class TileEntity;
 
 void (*FillingContainer_replaceSlot)(FillingContainer*, int, ItemInstance*);
 int (*FillingContainer_clearSlot)(FillingContainer*, int);
@@ -43,12 +50,15 @@ void (*ItemEntity_ItemEntity)(ItemEntity*, TileSource*, float, float, float, Ite
 static void (*_Font$Font)(Font*, void*, std::string const&, void*);
 static TileEntity* (*_TileEntityFactory)(short, TilePos const&);
 
+static void (*_Player$readAdditionalSaveData)(Player*, CompoundTag*);
+static void (*_Player$addAdditionalSaveData)(Player*, CompoundTag*);
+
 static void (*_Init$TileEntities)();
 static void (*Tile_initTiles_real)();
 
 const int barrelTileId = 201;
 Font* g_font;
-Barrel* barrel;
+Barrel* g_barrel;
 
 static void Font$Font(Font* font, void* options, std::string const& fontPath, void* texture)
 {
@@ -59,8 +69,8 @@ static void Font$Font(Font* font, void* options, std::string const& fontPath, vo
 static void Tile_initTiles_hook() {
 	Tile_initTiles_real();
 
-	barrel = new Barrel(barrelTileId);
-	Tile::tiles[barrelTileId] = barrel;
+	g_barrel = new Barrel(barrelTileId);
+	Tile::tiles[barrelTileId] = g_barrel;
 	TileItem* barrelItem = new TileItem(barrelTileId - 256);
 
 }
@@ -78,6 +88,70 @@ static void Init$TileEntities()
 // 	return _TileEntityFactory(tileEntityType, pos);
 // }
 
+void Player$readAdditionalSaveData(Player* player, CompoundTag* tag)
+{
+	CompoundTag* mainTag = (CompoundTag*)tag->tags["Barrels"];
+	if(mainTag != NULL)
+	{
+		for(const auto& it : mainTag->tags)
+		{
+			CompoundTag* barrel = (CompoundTag*)it.second;
+			std::string levelName = ((StringTag*)barrel->tags["LevelName"])->data;
+
+			IntTag* x = (IntTag*)barrel->tags["X"];
+			IntTag* y = (IntTag*)barrel->tags["Y"];
+			IntTag* z = (IntTag*)barrel->tags["Z"];
+
+			IntTag* itemID = (IntTag*)barrel->tags["ItemID"];
+			IntTag* itemDamage = (IntTag*)barrel->tags["ItemDamage"];
+			IntTag* itemCount = (IntTag*)barrel->tags["ItemCount"];
+
+			IntTag* maxItems = (IntTag*)barrel->tags["MaxItems"];
+			IntTag* maxStackSize = (IntTag*)barrel->tags["MaxStackSize"];
+			ByteTag* locked = (ByteTag*)barrel->tags["Locked"];
+
+			Container* cont = new Container(levelName, x->data, y->data, z->data);
+			cont->itemID = itemID->data;
+			cont->itemDamage = itemDamage->data;
+			cont->itemsCount = itemCount->data;
+
+			cont->maxItems = maxItems->data;
+			cont->maxStackSize = maxStackSize->data;
+			cont->locked = locked->data == 1 ? true : false;
+
+			g_barrel->containers[it.first] = cont;
+
+		}
+	}
+	_Player$readAdditionalSaveData(player, tag);
+}
+
+
+static void Player$addAdditionalSaveData(Player* player, CompoundTag* tag)
+{
+	CompoundTag* mainTag = (CompoundTag*)Tag::newTag(TAG_COMPOUND, "Barrels");
+	for(const auto& it : g_barrel->containers)
+	{
+		CompoundTag* barrel = (CompoundTag*)Tag::newTag(TAG_COMPOUND, it.first);
+		barrel->putString("LevelName", it.second->levelName);
+		barrel->putInt("X", it.second->x);
+		barrel->putInt("Y", it.second->y);
+		barrel->putInt("Z", it.second->z);
+
+		barrel->putInt("ItemID", it.second->itemID);
+		barrel->putInt("ItemDamage", it.second->itemDamage);
+		barrel->putInt("ItemCount", it.second->itemsCount);
+		barrel->putInt("MaxItems", it.second->maxItems);
+		barrel->putInt("MaxStackSize", it.second->maxStackSize);
+
+		barrel->putByte("Locked", (char)it.second->locked);
+
+		mainTag->put(it.first, barrel);
+	}
+
+	tag->put("Barrels", mainTag);
+	_Player$addAdditionalSaveData(player, tag);
+}
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
@@ -89,6 +163,12 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
 	void* init$TileEntities = dlsym(RTLD_DEFAULT, "_ZN10TileEntity16initTileEntitiesEv");
 	MSHookFunction(init$TileEntities, (void*)&Init$TileEntities, (void**)&_Init$TileEntities);
+
+	void* player$readAdditionalSaveData = dlsym(RTLD_DEFAULT, "_ZN6Player22readAdditionalSaveDataEP11CompoundTag");
+	MSHookFunction(player$readAdditionalSaveData, (void*) &Player$readAdditionalSaveData, (void**)&_Player$readAdditionalSaveData);
+
+	void* player$addData = dlsym(RTLD_DEFAULT, "_ZN6Player21addAdditionalSaveDataEP11CompoundTag");
+	MSHookFunction(player$addData, (void*)&Player$addAdditionalSaveData, (void**)&_Player$addAdditionalSaveData);
 
 	Font_draw = (void (*) (Font*, std::string const&, float, float, Color*)) dlsym(RTLD_DEFAULT, "_ZN4Font4drawERKSsffRK5Color");
 
