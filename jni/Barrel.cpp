@@ -3,6 +3,7 @@
 Barrel::Barrel(int id) : Tile(id, "cobblestone", &Material::wood)
 {
 	this->setDestroyTime(0.5);
+	this->setDescriptionId("barrel");
 	this->setTicking(true);
 }
 
