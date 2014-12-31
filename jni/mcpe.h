@@ -144,6 +144,9 @@ public:
 class Item {
 public:
 	char filler_item[76];
+
+	static Item* items[512];
+	static void initItems();
 };
 
 class TileItem : public Item {

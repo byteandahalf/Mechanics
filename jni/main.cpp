@@ -20,6 +20,7 @@ const std::string NAME = "Barrel";
 
 class TileEntity;
 class GameMode;
+class LevelSettings;
 
 void (*FillingContainer_replaceSlot)(FillingContainer*, int, ItemInstance*);
 int (*FillingContainer_clearSlot)(FillingContainer*, int);
@@ -55,7 +56,7 @@ void (*ItemEntity_ItemEntity)(ItemEntity*, TileSource*, float, float, float, Ite
 
 static void (*_Font$Font)(Font*, void*, std::string const&, void*);
 
-static void (*_Minecraft$init)(Minecraft*, std::string const&);
+static void (*_Minecraft$selectLevel)(Minecraft*, std::string const&, std::string const&, LevelSettings const&);
 
 static void (*_Player$readAdditionalSaveData)(Player*, CompoundTag*);
 static void (*_Player$addAdditionalSaveData)(Player*, CompoundTag*);
@@ -77,40 +78,42 @@ static void Tile_initTiles_hook() {
 	Tile_initTiles_real();
 
 	g_barrel = new Barrel(barrelTileId);
-	g_barrel->setDescriptionId(NAME);
-	(*bl_I18n_strings)["tile." + NAME + ".name"] = NAME;
 	Tile::tiles[barrelTileId] = g_barrel;
 
 	TileItem* barrelItem = new TileItem(barrelTileId - 256);
 
 }
 
-static void Minecraft$init(Minecraft* minecraft, std::string const& idk)
+static void Minecraft$selectLevel(Minecraft* minecraft, std::string const& wtf1, std::string const& wtf2, LevelSettings const& settings)
 {
-	_Minecraft$init(minecraft, idk);
+	g_barrel->setDescriptionId(NAME);
+	(*bl_I18n_strings)["tile." + NAME + ".name"] = NAME;
+
 	std::vector<ItemInstance> output = { (*create_ItemInstance(barrelTileId, 1, 0)) };
 
-		std::vector<std::string> shape;
-		shape.push_back("wsw");
-		shape.push_back("w w");
-		shape.push_back("www");
+	std::vector<std::string> shape;
+	shape.push_back("wsw");
+	shape.push_back("w w");
+	shape.push_back("www");
 
-		std::vector<Recipes::Type> ingredients;
-		Recipes::Type wood;
-		wood.c = 'w';
-		wood.item = NULL;
-		wood.tile = NULL;
-		wood.itemInstance = (*create_ItemInstance(17, 1, 0));
-		ingredients.push_back(wood);
+	std::vector<Recipes::Type> ingredients;
+	Recipes::Type wood;
+	wood.c = 'w';
+	wood.item = NULL;
+	wood.tile = Tile::tiles[17];
+	//wood.itemInstance = NULL;
+	ingredients.push_back(wood);
 
-		Recipes::Type slab;
-		slab.c = 's';
-		slab.item = NULL;
-		slab.tile = NULL;
-		slab.itemInstance = (*create_ItemInstance(158, 1, 0));
-		ingredients.push_back(slab);
+	Recipes::Type slab;
+	slab.c = 's';
+	slab.item = Item::items[158];
+	slab.tile = NULL;
+	//slab.itemInstance = NULL;//(*create_ItemInstance(158, 1, 0));
+	ingredients.push_back(slab);
 
-		Recipes::getInstance()->addShapedRecipe(output, shape, ingredients);
+	Recipes::getInstance()->addShapedRecipe(output, shape, ingredients);
+
+	_Minecraft$selectLevel(minecraft, wtf1, wtf2, settings);
 }
 
 static void Init$TileEntities()
@@ -225,8 +228,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	void* font$Font = dlsym(RTLD_DEFAULT, "_ZN4FontC2EP7OptionsRKSsP8Textures");
 	MSHookFunction(font$Font, (void*) &Font$Font, (void**)&_Font$Font);
 
-	void* minecraft$init = dlsym(RTLD_DEFAULT, "_ZN9Minecraft4initERKSs");
-	MSHookFunction(minecraft$init, (void*)&Minecraft$init, (void**)&_Minecraft$init);
+	void* minecraft$selectLevel = dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
+	MSHookFunction(minecraft$selectLevel, (void*)&Minecraft$selectLevel, (void**)&_Minecraft$selectLevel);
 
 	void* init$TileEntities = dlsym(RTLD_DEFAULT, "_ZN10TileEntity16initTileEntitiesEv");
 	MSHookFunction(init$TileEntities, (void*)&Init$TileEntities, (void**)&_Init$TileEntities);
