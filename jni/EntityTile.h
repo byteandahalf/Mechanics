@@ -2,8 +2,6 @@
 #define ENTITY_TILE_H_
 
 #include <mcpe.h>
-#include <dlfcn.h>
-#include <android/log.h>
 
 class TileEntity;
 
@@ -11,8 +9,9 @@ class EntityTile : public Tile
 {
 	
 public:
-	EntityTile(int, Material*);
-	EntityTile(int, std::string const&, Material*);
+	EntityTile(int, const Material*);
+	EntityTile(int, std::string const&, const Material*);
+	~EntityTile();
 
 	virtual void triggerEvent(TileSource *,int,int,int,int,int);
 	virtual void neighborChanged(TileSource *,int,int,int,int,int,int);

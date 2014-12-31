@@ -99,7 +99,7 @@ public:
 	virtual float getExplosionResistance(Entity*); // 37
 	virtual void clip(TileSource*, int, int, int, Vec3 const&, Vec3 const&, bool, int); // 38
 	virtual void wasExploded(TileSource*, int, int, int); // 39
-	virtual void use(Player*, int, int, int); // 40
+	virtual bool use(Player*, int, int, int); // 40
 	virtual void stepOn(Entity*, int, int, int); // 41
 	virtual void fallOn(TileSource*, int, int, int, Entity*, float); // 42
 	virtual void getPlacementDataValue(Mob*, int, int, int, signed char, float, float, float, int); // 43

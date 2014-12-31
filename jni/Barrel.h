@@ -17,7 +17,7 @@ public:
 public:
 	Barrel(int id);
 
-	virtual void use(Player*, int, int, int);
+	virtual bool use(Player*, int, int, int);
 	virtual void attack(Player*, int, int, int);
 	virtual void onPlace(TileSource*, int, int, int);
 	virtual void onRemove(TileSource*, int, int, int);

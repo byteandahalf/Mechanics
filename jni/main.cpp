@@ -14,8 +14,6 @@
 #include "Utils.h"
 #include "Recipe.h"
 
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__))
-
 const std::string NAME = "Barrel";
 
 class TileEntity;
@@ -91,7 +89,7 @@ static void Minecraft$selectLevel(Minecraft* minecraft, std::string const& wtf1,
 	{
 		registered = true;
 
-		g_barrel->setDescriptionId(NAME);
+		//g_barrel->setDescriptionId(NAME);
 		(*bl_I18n_strings)["tile." + NAME + ".name"] = NAME;
 
 		std::vector<ItemInstance> output = { (*create_ItemInstance(barrelTileId, 1, 0)) };
@@ -105,14 +103,12 @@ static void Minecraft$selectLevel(Minecraft* minecraft, std::string const& wtf1,
 		wood.c = 'w';
 		wood.item = NULL;
 		wood.tile = Tile::tiles[17];
-		//wood.itemInstance = NULL;
 		ingredients.push_back(wood);
 
 		Recipes::Type slab;
 		slab.c = 's';
 		slab.item = Item::items[158];
 		slab.tile = NULL;
-		//slab.itemInstance = NULL;//(*create_ItemInstance(158, 1, 0));
 		ingredients.push_back(slab);
 
 		Recipes::getInstance()->addShapedRecipe(output, shape, ingredients);

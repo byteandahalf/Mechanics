@@ -3,7 +3,7 @@
 Barrel::Barrel(int id) : Tile(id, "cobblestone", &Material::wood)
 {
 	this->setDestroyTime(0.5);
-	this->setDescriptionId("barrel");
+	this->setDescriptionId("Barrel");
 	this->setTicking(true);
 }
 
@@ -19,6 +19,8 @@ int Barrel::getColor(int idk)
 
 void Barrel::onPlace(TileSource* ts, int x, int y, int z)
 {
+	LOGI("Barrel Placed");
+
 	Level* level = TileSource_getLevel(ts);
 	std::string id = getIdentifier(level, x, y, z);
 	this->containers[id] = new Container(LevelData_getLevelName(Level_getLevelData(level)), x, y, z);
@@ -26,13 +28,12 @@ void Barrel::onPlace(TileSource* ts, int x, int y, int z)
 
 void Barrel::onRemove(TileSource* ts, int x, int y, int z)
 {
+	LOGI("Barrel Removed");
 	Level* level = TileSource_getLevel(ts);
 	std::string id = getIdentifier(level, x, y, z);
 	Container* container = this->containers[id];
 	if(container == NULL)
-	{
 		return;
-	}
 
 	while(container->itemsCount > 0 && container->itemID != 0)
 	{
@@ -49,8 +50,10 @@ void Barrel::onRemove(TileSource* ts, int x, int y, int z)
 	this->containers.erase(id);
 }
 
-void Barrel::use(Player* player, int x, int y, int z)
+bool Barrel::use(Player* player, int x, int y, int z)
 {
+	LOGI("Barrel Used");
+
 	Level* level = getLevel(player);
 	std::string ident = getIdentifier(level, x, y, z);
 	Container* container = this->containers[ident];
@@ -121,12 +124,15 @@ void Barrel::use(Player* player, int x, int y, int z)
 		container->itemDamage = 0;
 		container->itemsCount = 0;
 	}
+
+	return true;
 }
 
 
 
 void Barrel::attack(Player* player, int x, int y, int z)
 {
+	LOGI("Barrel Attacked!");
 	Level* level = getLevel(player);
 	std::string id = getIdentifier(level, x, y, z);
 	Container* container = this->containers.at(id);

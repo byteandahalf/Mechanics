@@ -25,6 +25,9 @@
 #define TAG_STRING 8
 #define TAG_COMPOUND 10
 
+
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__))
+
 class Level;
 class LevelData;
 class Font;
