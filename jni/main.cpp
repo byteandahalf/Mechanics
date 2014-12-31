@@ -64,6 +64,7 @@ static void (*_Player$addAdditionalSaveData)(Player*, CompoundTag*);
 static void (*_Init$TileEntities)();
 static void (*Tile_initTiles_real)();
 
+bool registered = false;
 const int barrelTileId = 201;
 Font* g_font;
 Barrel* g_barrel;
@@ -86,33 +87,36 @@ static void Tile_initTiles_hook() {
 
 static void Minecraft$selectLevel(Minecraft* minecraft, std::string const& wtf1, std::string const& wtf2, LevelSettings const& settings)
 {
-	g_barrel->setDescriptionId(NAME);
-	(*bl_I18n_strings)["tile." + NAME + ".name"] = NAME;
+	if(!registered)
+	{
+		registered = true;
 
-	std::vector<ItemInstance> output = { (*create_ItemInstance(barrelTileId, 1, 0)) };
+		g_barrel->setDescriptionId(NAME);
+		(*bl_I18n_strings)["tile." + NAME + ".name"] = NAME;
 
-	std::vector<std::string> shape;
-	shape.push_back("wsw");
-	shape.push_back("w w");
-	shape.push_back("www");
+		std::vector<ItemInstance> output = { (*create_ItemInstance(barrelTileId, 1, 0)) };
+		std::vector<std::string> shape;
+		shape.push_back("wsw");
+		shape.push_back("w w");
+		shape.push_back("www");
 
-	std::vector<Recipes::Type> ingredients;
-	Recipes::Type wood;
-	wood.c = 'w';
-	wood.item = NULL;
-	wood.tile = Tile::tiles[17];
-	//wood.itemInstance = NULL;
-	ingredients.push_back(wood);
+		std::vector<Recipes::Type> ingredients;
+		Recipes::Type wood;
+		wood.c = 'w';
+		wood.item = NULL;
+		wood.tile = Tile::tiles[17];
+		//wood.itemInstance = NULL;
+		ingredients.push_back(wood);
 
-	Recipes::Type slab;
-	slab.c = 's';
-	slab.item = Item::items[158];
-	slab.tile = NULL;
-	//slab.itemInstance = NULL;//(*create_ItemInstance(158, 1, 0));
-	ingredients.push_back(slab);
+		Recipes::Type slab;
+		slab.c = 's';
+		slab.item = Item::items[158];
+		slab.tile = NULL;
+		//slab.itemInstance = NULL;//(*create_ItemInstance(158, 1, 0));
+		ingredients.push_back(slab);
 
-	Recipes::getInstance()->addShapedRecipe(output, shape, ingredients);
-
+		Recipes::getInstance()->addShapedRecipe(output, shape, ingredients);
+	}
 	_Minecraft$selectLevel(minecraft, wtf1, wtf2, settings);
 }
 
