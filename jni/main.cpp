@@ -29,9 +29,6 @@ void (*FillingContainer_setItem)(FillingContainer*, int, ItemInstance*);
 int (*FillingContainer_getFreeSlot)(FillingContainer*);
 
 std::map <std::string, std::string>* bl_I18n_strings;
-static Recipes* (*bl_Recipes_getInstance)();
-static void (*bl_Recipes_addShapedRecipe)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&,
-	std::vector<Recipes::Type> const&);
 
 ItemInstance* (*Player_getCarriedItem)(Player*);
 
@@ -57,9 +54,8 @@ void (*Font_draw)(Font*, std::string const&, float, float, Color*);
 void (*ItemEntity_ItemEntity)(ItemEntity*, TileSource*, float, float, float, ItemInstance*);
 
 static void (*_Font$Font)(Font*, void*, std::string const&, void*);
-static TileEntity* (*_TileEntityFactory)(short, TilePos const&);
 
-static void (*_GameMode$GameMode)(GameMode* gamemode, Minecraft* minecraft);
+static void (*_Minecraft$init)(Minecraft*, std::string const&);
 
 static void (*_Player$readAdditionalSaveData)(Player*, CompoundTag*);
 static void (*_Player$addAdditionalSaveData)(Player*, CompoundTag*);
@@ -81,47 +77,40 @@ static void Tile_initTiles_hook() {
 	Tile_initTiles_real();
 
 	g_barrel = new Barrel(barrelTileId);
-	Tile::tiles[barrelTileId] = g_barrel;
-
 	g_barrel->setDescriptionId(NAME);
 	(*bl_I18n_strings)["tile." + NAME + ".name"] = NAME;
+	Tile::tiles[barrelTileId] = g_barrel;
 
 	TileItem* barrelItem = new TileItem(barrelTileId - 256);
 
 }
 
-static void GameMode$GameMode(GameMode* gamemode, Minecraft* minecraft)
+static void Minecraft$init(Minecraft* minecraft, std::string const& idk)
 {
+	_Minecraft$init(minecraft, idk);
 	std::vector<ItemInstance> output = { (*create_ItemInstance(barrelTileId, 1, 0)) };
 
-	std::vector<std::string> shape;
-	shape.push_back("wsw");
-	shape.push_back("w w");
-	shape.push_back("www");
+		std::vector<std::string> shape;
+		shape.push_back("wsw");
+		shape.push_back("w w");
+		shape.push_back("www");
 
-	std::vector<Recipes::Type> ingredients;
-	Recipes::Type wood;
-	wood.c = 'w';
-	wood.item = NULL;
-	wood.tile = NULL;
-	wood.itemInstance = (*create_ItemInstance(17, 1, 0));
-	ingredients.push_back(wood);
+		std::vector<Recipes::Type> ingredients;
+		Recipes::Type wood;
+		wood.c = 'w';
+		wood.item = NULL;
+		wood.tile = NULL;
+		wood.itemInstance = (*create_ItemInstance(17, 1, 0));
+		ingredients.push_back(wood);
 
-	Recipes::Type slab;
-	slab.c = 's';
-	slab.item = NULL;
-	slab.tile = NULL;
-	slab.itemInstance = (*create_ItemInstance(158, 1, 0));
-	ingredients.push_back(slab);
+		Recipes::Type slab;
+		slab.c = 's';
+		slab.item = NULL;
+		slab.tile = NULL;
+		slab.itemInstance = (*create_ItemInstance(158, 1, 0));
+		ingredients.push_back(slab);
 
-	Recipes* recipes = bl_Recipes_getInstance();
-	if(recipes != NULL)
-		bl_Recipes_addShapedRecipe(recipes, output, shape, ingredients);
-	else
-		LOGI("NULL");
-
-	_GameMode$GameMode(gamemode, minecraft);
-
+		Recipes::getInstance()->addShapedRecipe(output, shape, ingredients);
 }
 
 static void Init$TileEntities()
@@ -129,13 +118,6 @@ static void Init$TileEntities()
 	_Init$TileEntities();
 	//TODO: Register my tile entities
 }
-
-// static TileEntity* TileEntityFactory(short tileEntityType, TilePos const& pos)
-// {
-// 	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "TileEntity: %d", tileEntityType);
-// 	//TODO: if tileEntityType = 5, then return new BarrelTileEntity
-// 	return _TileEntityFactory(tileEntityType, pos);
-// }
 
 void Player$readAdditionalSaveData(Player* player, CompoundTag* tag)
 {
@@ -207,30 +189,7 @@ static void Player$addAdditionalSaveData(Player* player, CompoundTag* tag)
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
-	void* font$Font = dlsym(RTLD_DEFAULT, "_ZN4FontC2EP7OptionsRKSsP8Textures");
-	MSHookFunction(font$Font, (void*) &Font$Font, (void**)&_Font$Font);
-
-	// void* tileEntityFactory$createTileEntity = dlsym(RTLD_DEFAULT, "_ZN17TileEntityFactory16createTileEntityE14TileEntityTypeRK7TilePos");
-	// MSHookFunction(tileEntityFactory$createTileEntity, (void*) &TileEntityFactory, (void**) &_TileEntityFactory);
-
-	void* gameMode$gameMode = dlsym(RTLD_DEFAULT, "_ZN8GameModeC2EP9Minecraft");
-	MSHookFunction(gameMode$gameMode, (void*) &GameMode$GameMode, (void**)&_GameMode$GameMode);
-
-	void* init$TileEntities = dlsym(RTLD_DEFAULT, "_ZN10TileEntity16initTileEntitiesEv");
-	MSHookFunction(init$TileEntities, (void*)&Init$TileEntities, (void**)&_Init$TileEntities);
-
-	void* player$readAdditionalSaveData = dlsym(RTLD_DEFAULT, "_ZN6Player22readAdditionalSaveDataEP11CompoundTag");
-	MSHookFunction(player$readAdditionalSaveData, (void*) &Player$readAdditionalSaveData, (void**)&_Player$readAdditionalSaveData);
-
-	void* player$addData = dlsym(RTLD_DEFAULT, "_ZN6Player21addAdditionalSaveDataEP11CompoundTag");
-	MSHookFunction(player$addData, (void*)&Player$addAdditionalSaveData, (void**)&_Player$addAdditionalSaveData);
-
 	bl_I18n_strings = (std::map <std::string, std::string> *) dlsym(RTLD_DEFAULT, "_ZN4I18n8_stringsE");
-
-	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(RTLD_DEFAULT, "_ZN7Recipes11getInstanceEv");
-	bl_Recipes_addShapedRecipe = (void (*)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&,
-			std::vector<Recipes::Type> const&)) dlsym(RTLD_DEFAULT,
-			"_ZN7Recipes15addShapedRecipeERKSt6vectorI12ItemInstanceSaIS1_EERKS0_ISsSaISsEERKS0_INS_4TypeESaISA_EE");
 
 	Font_draw = (void (*) (Font*, std::string const&, float, float, Color*)) dlsym(RTLD_DEFAULT, "_ZN4Font4drawERKSsffRK5Color");
 
@@ -262,6 +221,21 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
 	//ItemEnity Size 332,  Player::drop(ItemInstance const*, bool)
 	ItemEntity_ItemEntity = (void (*) (ItemEntity*, TileSource*, float, float, float, ItemInstance*)) dlsym(RTLD_DEFAULT, "_ZN10ItemEntityC2ER10TileSourcefffRK12ItemInstance");
+
+	void* font$Font = dlsym(RTLD_DEFAULT, "_ZN4FontC2EP7OptionsRKSsP8Textures");
+	MSHookFunction(font$Font, (void*) &Font$Font, (void**)&_Font$Font);
+
+	void* minecraft$init = dlsym(RTLD_DEFAULT, "_ZN9Minecraft4initERKSs");
+	MSHookFunction(minecraft$init, (void*)&Minecraft$init, (void**)&_Minecraft$init);
+
+	void* init$TileEntities = dlsym(RTLD_DEFAULT, "_ZN10TileEntity16initTileEntitiesEv");
+	MSHookFunction(init$TileEntities, (void*)&Init$TileEntities, (void**)&_Init$TileEntities);
+
+	void* player$readAdditionalSaveData = dlsym(RTLD_DEFAULT, "_ZN6Player22readAdditionalSaveDataEP11CompoundTag");
+	MSHookFunction(player$readAdditionalSaveData, (void*) &Player$readAdditionalSaveData, (void**)&_Player$readAdditionalSaveData);
+
+	void* player$addData = dlsym(RTLD_DEFAULT, "_ZN6Player21addAdditionalSaveDataEP11CompoundTag");
+	MSHookFunction(player$addData, (void*)&Player$addAdditionalSaveData, (void**)&_Player$addAdditionalSaveData);
 
 	MSHookFunction((void*) &Tile::initTiles, (void*) &Tile_initTiles_hook, (void**) &Tile_initTiles_real);
 	return JNI_VERSION_1_2;
