@@ -2,11 +2,11 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <memory>
 
 class TileSource;
 class AABB;
 class Random;
-class Entity;
 class Mob;
 class Player;
 class TilePos;
@@ -15,6 +15,26 @@ class TextureUVCoordinateSet;
 class ItemInstance;
 class Minecraft;
 class GuiMessage;
+class TileTessellator;
+class Level;
+class Textures;
+
+class Entity {
+public:
+	Entity(Level&);
+	Entity(TileSource&);
+};
+class ItemEntity : public Entity {
+public:
+	ItemEntity(Level&);
+	ItemEntity(TileSource&, float, float, float, ItemInstance const&);
+};
+
+class MaterialPtr
+{
+public:
+	MaterialPtr();
+};
 
 class Material {
 public:
@@ -81,7 +101,7 @@ public:
 	virtual bool mayPick(int, bool); // 19
 	virtual bool mayPlace(TileSource*, int, int, int, signed char); // 20
 	virtual bool mayPlace(TileSource*, int, int, int); // 21
-	virtual void getTickDelay(); // 22
+	virtual int getTickDelay(); // 22
 	virtual void tick(TileSource*, int, int, int, Random*); // 23
 	virtual void animateTick(TileSource*, int, int, int, Random*); // 24
 	virtual void destroy(TileSource*, int, int, int, int); // 25
@@ -91,8 +111,8 @@ public:
 	virtual void onRemove(TileSource*, int, int, int); // 29
 	virtual void getSecondPart(TileSource&, TilePos const&, TilePos&); // 30
 	virtual void onGraphicsModeChanged(bool, bool); // 31
-	virtual void getResource(int, Random*); // 32
-	virtual void getResourceCount(Random*); // 33
+	virtual int getResource(int, Random*); // 32
+	virtual int getResourceCount(Random*); // 33
 	virtual void getDestroyProgress(Player*); // 34
 	virtual void spawnResources(TileSource*, int, int, int, int, float); // 35
 	virtual void spawnBurnResources(TileSource*, float, float, float); // 36
@@ -156,6 +176,48 @@ public:
 	TileItem(int);
 };
 
+class ItemInstance
+{
+public:
+	int count; //0
+	int damage; //4
+	Item* item;//8
+	Tile* block; //12
+	bool valid; //16
+
+	ItemInstance();
+	ItemInstance(int, int, int);
+};
+
+struct FullTile
+{
+	unsigned char id;
+	unsigned char data;
+};
+
+class Vec3{
+public:
+	float x;
+	float y;
+	float z;
+};
+
+class TilePos{
+public:
+	int x;
+	int y;
+	int z;
+};
+
+class Color
+{
+public:
+	float r;
+	float g;
+	float b;
+	float a;
+};
+
 class Token {
 public:
 	enum Type {
@@ -192,14 +254,46 @@ public:
 	void addCommand(std::string const&, std::string const&, std::function<std::string (std::vector<Token> const&)> const&);
 };
 
-class Minecraft {
+class EntityShaderManager
+{
 public:
-	Minecraft(int, char**);
-
-	ServerCommandParser* getCommandParser();
+	EntityShaderManager();
 };
 
-class MinecraftClient : public Minecraft {
+class EntityRenderer : EntityShaderManager {
 public:
-	void init();
+	EntityRenderer();
 };
+
+
+class ItemRenderer : public EntityRenderer {
+public:
+	std::unique_ptr<TileTessellator> tileTessellator;
+	float rndFloats[16];
+	bool inited;
+	MaterialPtr entityAlphatestMat;
+	MaterialPtr uiFillMat;
+	MaterialPtr uiBlitMat;
+	MaterialPtr uiIconBlitMat;
+
+	static ItemRenderer& singleton();
+
+	void render(Entity&, Vec3 const&, float, float);
+	void renderGuiItemNew(Textures*, ItemInstance const*,int,float,float,float,float,float);
+};
+
+enum HitResultType
+{
+	TILE,
+	ENITY,
+	NO_HIT
+};
+
+typedef struct {
+	HitResultType type; //0
+	int f; //4
+	TilePos tile;
+	Vec3 hitVec; //20
+	Entity* entity; //32
+	bool indirectHit; //36
+} HitResult;

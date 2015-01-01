@@ -5,6 +5,8 @@
 #include <mcpe.h>
 #include <Substrate.h>
 #include <map>
+#include <memory>
+#include <sstream>
 
 #include "Barrel.h"
 #include "NBT/CompoundTag.h"
@@ -13,12 +15,17 @@
 #include "NBT/StringTag.h"
 #include "Utils.h"
 #include "Recipe.h"
+#include "mcpe/MinecraftClient.h"
+
+using namespace std;
 
 const std::string NAME = "Barrel";
 
 class TileEntity;
 class GameMode;
 class LevelSettings;
+class TileTessellator;
+class Gui;
 
 void (*FillingContainer_replaceSlot)(FillingContainer*, int, ItemInstance*);
 int (*FillingContainer_clearSlot)(FillingContainer*, int);
@@ -47,14 +54,19 @@ void (*LevelData_setTagData)(LevelData*, CompoundTag*);
 Tag* (*LevelData_getTagData)(LevelData*, CompoundTag*);
 
 Level* (*TileSource_getLevel)(TileSource*);
+void (*TileSource$getTile)(FullTile&, TileSource*, TilePos const&);
 
-void (*Font_draw)(Font*, std::string const&, float, float, Color*);
+void (*Font_drawShadow)(Font*, std::string const&, float, float, Color const&);
 
 void (*ItemEntity_ItemEntity)(ItemEntity*, TileSource*, float, float, float, ItemInstance*);
 
-static void (*_Font$Font)(Font*, void*, std::string const&, void*);
+static void (*_Font$Font)(Font*, void*, std::string const&, Textures*);
 
 static void (*_Minecraft$selectLevel)(Minecraft*, std::string const&, std::string const&, LevelSettings const&);
+
+static void (*_Gui$render)(Gui*, float, bool, int, int);
+
+static void (*_Screen$setSize)(Screen*, int, int);
 
 static void (*_Player$readAdditionalSaveData)(Player*, CompoundTag*);
 static void (*_Player$addAdditionalSaveData)(Player*, CompoundTag*);
@@ -63,28 +75,84 @@ static void (*_Init$TileEntities)();
 static void (*Tile_initTiles_real)();
 
 bool registered = false;
-const int barrelTileId = 201;
 Font* g_font;
 Barrel* g_barrel;
+Player* g_player = NULL;
+Textures* g_textures = NULL;
+Level* g_level = NULL;
+TileSource* g_tileSource = NULL;
+Minecraft* g_minecraft = NULL;
+int screen_width = 0;
+int screen_height = 0;
 
-static void Font$Font(Font* font, void* options, std::string const& fontPath, void* texture)
+static void Font$Font(Font* font, void* options, std::string const& fontPath, Textures* texture)
 {
 	g_font = font;
+	g_textures = texture;
 	_Font$Font(font, options, fontPath, texture);
 }
 
 static void Tile_initTiles_hook() {
 	Tile_initTiles_real();
 
-	g_barrel = new Barrel(barrelTileId);
-	Tile::tiles[barrelTileId] = g_barrel;
+	g_barrel = new Barrel(BARREL_ID);
+	Tile::tiles[BARREL_ID] = g_barrel;
 
-	TileItem* barrelItem = new TileItem(barrelTileId - 256);
+	TileItem* barrelItem = new TileItem(BARREL_ID - 256);
 
+}
+
+static void Gui$render(Gui* gui, float wtf, bool idk, int idk2, int idk3)
+{
+	_Gui$render(gui, wtf, idk, idk2, idk3);
+	if(g_tileSource != NULL)
+	{
+		HitResult* result = (HitResult*) ((uintptr_t) g_level + MINECRAFT_HIT_RESULT_OFFSET);
+		FullTile tile;
+		TileSource$getTile(tile, g_tileSource, result->tile);
+		if(result->type == HitResultType::TILE &&  tile.id == BARREL_ID)
+		{
+			std::string id = getIdentifier(g_level, result->tile.x, result->tile.y, result->tile.z);
+			Container* container = g_barrel->containers.at(id);
+			if(container != NULL && container->itemID > 0)
+			{
+				Color color;
+				if(container->itemID == container->maxItems)
+				{
+					color.r = 255;
+					color.g = 0;
+					color.b = 0;
+					color.a = 255;
+				}
+				else if((container->itemsCount / container->maxItems) >= 0.80)
+				{
+					color.r = 255;
+					color.g = 255;
+					color.b = 0;
+					color.a = 255;
+				}
+				else
+				{
+					color.r = 0;
+					color.g = 255;
+					color.b = 0;
+					color.a = 255;
+				}
+
+				std::stringstream str;
+				str << "Items Count: " << container->itemsCount << "/" << container->maxItems;
+				str << "(" << ((float)(container->itemsCount / container->maxStackSize)) << "/" << container->maxStackSize << ")";
+				std::string temp = str.str();
+				Font_drawShadow(g_font, temp, ((screen_width / 2) - (temp.length() * 2)), 10, color);
+				ItemRenderer::singleton().renderGuiItemNew(g_textures, new ItemInstance(container->itemID, 1, container->itemDamage), 0, (screen_width / 2), 30, 1, 2, 2);
+			}
+		}
+	}
 }
 
 static void Minecraft$selectLevel(Minecraft* minecraft, std::string const& wtf1, std::string const& wtf2, LevelSettings const& settings)
 {
+	g_minecraft = minecraft;
 	if(!registered)
 	{
 		registered = true;
@@ -92,12 +160,7 @@ static void Minecraft$selectLevel(Minecraft* minecraft, std::string const& wtf1,
 		//g_barrel->setDescriptionId(NAME);
 		(*bl_I18n_strings)["tile." + NAME + ".name"] = NAME;
 
-		std::vector<ItemInstance> output = { (*create_ItemInstance(barrelTileId, 1, 0)) };
-		std::vector<std::string> shape;
-		shape.push_back("wsw");
-		shape.push_back("w w");
-		shape.push_back("www");
-
+		std::vector<std::string> shape = { "wsw", "w w", "www"};
 		std::vector<Recipes::Type> ingredients;
 		Recipes::Type wood;
 		wood.c = 'w';
@@ -111,10 +174,18 @@ static void Minecraft$selectLevel(Minecraft* minecraft, std::string const& wtf1,
 		slab.tile = NULL;
 		ingredients.push_back(slab);
 
-		Recipes::getInstance()->addShapedRecipe(output, shape, ingredients);
+		Recipes::getInstance()->addShapedRecipe((*create_ItemInstance(BARREL_ID, 1, 0)), shape, ingredients);
 	}
 	_Minecraft$selectLevel(minecraft, wtf1, wtf2, settings);
 }
+
+static void Screen$setSize(Screen* screen, int width, int height)
+{
+	_Screen$setSize(screen, width, height);
+	screen_width = width;
+	screen_height = height;
+}
+
 
 static void Init$TileEntities()
 {
@@ -124,6 +195,11 @@ static void Init$TileEntities()
 
 void Player$readAdditionalSaveData(Player* player, CompoundTag* tag)
 {
+	g_player = player;
+	g_level = getLevel(player);
+	g_tileSource = getTileSource(g_level);
+
+
 	CompoundTag* mainTag = (CompoundTag*)tag->tags["Barrels"];
 	if(mainTag != NULL)
 	{
@@ -194,7 +270,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
 	bl_I18n_strings = (std::map <std::string, std::string> *) dlsym(RTLD_DEFAULT, "_ZN4I18n8_stringsE");
 
-	Font_draw = (void (*) (Font*, std::string const&, float, float, Color*)) dlsym(RTLD_DEFAULT, "_ZN4Font4drawERKSsffRK5Color");
+	Font_drawShadow = (void (*) (Font*, std::string const&, float, float, Color const&)) dlsym(RTLD_DEFAULT, "_ZN4Font4drawERKSsffRK5Color");
 
 	Player_getCarriedItem = (ItemInstance* (*) (Player*)) dlsym(RTLD_DEFAULT, "_ZN6Player14getCarriedItemEv");
 
@@ -211,6 +287,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	FillingContainer_getFreeSlot = (int (*) (FillingContainer*)) dlsym(RTLD_DEFAULT, "_ZN16FillingContainer11getFreeSlotEv");
 
 	Level_addEntity = (void (*) (Level*, Entity*)) dlsym(RTLD_DEFAULT, "_ZN5Level9addEntityEP6Entity");
+	TileSource$getTile = (void (*) (FullTile&, TileSource*, TilePos const&)) dlsym(RTLD_DEFAULT, "_ZN10TileSource7getTileERK7TilePos");
 
 	Entity_setPos = (void (*) (Entity*, float, float, float)) dlsym(RTLD_DEFAULT, "_ZN6Entity6setPosEfff");
 
@@ -230,6 +307,12 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
 	void* minecraft$selectLevel = dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
 	MSHookFunction(minecraft$selectLevel, (void*)&Minecraft$selectLevel, (void**)&_Minecraft$selectLevel);
+
+	void* screen$setSize = dlsym(RTLD_DEFAULT, "_ZN6Screen7setSizeEii");
+	MSHookFunction(screen$setSize, (void*)&Screen$setSize, (void**)&_Screen$setSize);
+
+	void* gui$render = dlsym(RTLD_DEFAULT, "_ZN3Gui6renderEfbii");
+	MSHookFunction(gui$render, (void*)&Gui$render, (void**)&_Gui$render);
 
 	void* init$TileEntities = dlsym(RTLD_DEFAULT, "_ZN10TileEntity16initTileEntitiesEv");
 	MSHookFunction(init$TileEntities, (void*)&Init$TileEntities, (void**)&_Init$TileEntities);

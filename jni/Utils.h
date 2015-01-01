@@ -19,6 +19,7 @@
 #define LEVEL_TILE_SOURCE_OFFSET 2976
 #define ENTITY_ISPICKABLE 41
 #define ENTITY_PLAYERTOUCH 38
+#define MINECRAFT_HIT_RESULT_OFFSET 2680
 
 #define TAG_BYTE 1
 #define TAG_INT 3
@@ -28,56 +29,14 @@
 
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__))
 
-class Level;
 class LevelData;
 class Font;
-class MaterialPtr;
 class TileSource;
 
-class Entity {};
-class ItemEntity : public Entity {
-public:
-};
 
 class FillingContainer {};
 
 class Inventory : public FillingContainer {};
-
-class ItemInstance
-{
-public:
-	int count; //0
-	int damage; //4
-	Item* item;//8
-	void* block; //12
-	bool wtf; //16
-	bool wtf2; //17
-	bool wtf3; //18
-	bool wtf4; //19
-};
-
-class Vec3{
-public:
-	float x;
-	float y;
-	float z;
-};
-
-class TilePos{
-public:
-	int x;
-	int y;
-	int z;
-};
-
-class Color
-{
-public:
-	float r;
-	float g;
-	float b;
-	float a;
-};
 
 extern void (*FillingContainer_replaceSlot)(FillingContainer*, int, ItemInstance*);
 extern int (*FillingContainer_getFreeSlot)(FillingContainer*);
@@ -99,7 +58,7 @@ extern void (*Level_addEntity)(Level*, Entity*);
 
 extern void (*Entity_setPos)(Entity*, float, float, float);
 
-extern void (*Font_draw)(Font*, std::string const&, float, float, Color*);
+extern void (*Font_drawShadow)(Font*, std::string const&, float, float, Color const&);
 
 extern LevelData* (*Level_getLevelData)(Level*);
 extern void (*LevelData_setTagData)(LevelData*, CompoundTag*);

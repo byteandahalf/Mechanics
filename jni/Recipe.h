@@ -29,5 +29,5 @@ public:
 	};
 
 	static Recipes* getInstance();
-	void addShapedRecipe(std::vector<ItemInstance> const&, std::vector<std::string> const&, std::vector<Recipes::Type> const&);
+	void addShapedRecipe(ItemInstance const&, std::vector<std::string> const&, std::vector<Recipes::Type> const&);
 };

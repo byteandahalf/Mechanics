@@ -1,6 +1,8 @@
 #ifndef BARREL_H_
 #define BARREL_H_
 
+#define BARREL_ID 201
+
 #include <map>
 #include <math.h>
 #include <mcpe.h>
@@ -23,6 +25,8 @@ public:
 	virtual void onRemove(TileSource*, int, int, int);
 	virtual int getColor(TileSource*, int, int, int);
 	virtual int getColor(int);
+	virtual int getResource(int, Random*); // 32
+	virtual int getResourceCount(Random*); // 33
 
 };
 #endif
