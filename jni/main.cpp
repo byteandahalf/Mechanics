@@ -141,7 +141,7 @@ static void Gui$render(Gui* gui, float wtf, bool idk, int idk2, int idk3)
 
 				std::stringstream str;
 				str << "Items Count: " << container->itemsCount << "/" << container->maxItems;
-				str << "(" << ((float)(container->itemsCount / container->maxStackSize)) << "/" << container->maxStackSize << ")";
+				str << "(" << ((float)(container->itemsCount / container->maxStackSize)) << "/" << (container->maxItems / container->maxStackSize) << ")";
 				std::string temp = str.str();
 				Font_drawShadow(g_font, temp, ((screen_width / 2) - (temp.length() * 2)), 10, color);
 				ItemRenderer::singleton().renderGuiItemNew(g_textures, new ItemInstance(container->itemID, 1, container->itemDamage), 0, (screen_width / 2), 30, 1, 2, 2);
