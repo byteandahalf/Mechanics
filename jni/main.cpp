@@ -71,7 +71,6 @@ static void (*_Screen$setSize)(Screen*, int, int);
 static void (*_Player$readAdditionalSaveData)(Player*, CompoundTag*);
 static void (*_Player$addAdditionalSaveData)(Player*, CompoundTag*);
 
-static void (*_Init$TileEntities)();
 static void (*Tile_initTiles_real)();
 
 bool registered = false;
@@ -185,13 +184,6 @@ static void Screen$setSize(Screen* screen, int width, int height)
 	_Screen$setSize(screen, width, height);
 	screen_width = width;
 	screen_height = height;
-}
-
-
-static void Init$TileEntities()
-{
-	_Init$TileEntities();
-	//TODO: Register my tile entities
 }
 
 void Player$readAdditionalSaveData(Player* player, CompoundTag* tag)
@@ -314,9 +306,6 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
 	void* gui$render = dlsym(RTLD_DEFAULT, "_ZN3Gui6renderEfbii");
 	MSHookFunction(gui$render, (void*)&Gui$render, (void**)&_Gui$render);
-
-	void* init$TileEntities = dlsym(RTLD_DEFAULT, "_ZN10TileEntity16initTileEntitiesEv");
-	MSHookFunction(init$TileEntities, (void*)&Init$TileEntities, (void**)&_Init$TileEntities);
 
 	void* player$readAdditionalSaveData = dlsym(RTLD_DEFAULT, "_ZN6Player22readAdditionalSaveDataEP11CompoundTag");
 	MSHookFunction(player$readAdditionalSaveData, (void*) &Player$readAdditionalSaveData, (void**)&_Player$readAdditionalSaveData);

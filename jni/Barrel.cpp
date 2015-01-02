@@ -114,8 +114,8 @@ bool Barrel::use(Player* player, int x, int y, int z)
 		{
 			int i = (container->itemsCount + instance->count) - container->maxItems;
 			itemInstance->count = i;
-			container->itemsCount += (instance->count - i);
-		} else {
+			container->itemsCount = container->maxItems;
+		}else {
 			container->itemsCount += instance->count;
 			FillingContainer_clearSlot(inv, slot);
 		}
