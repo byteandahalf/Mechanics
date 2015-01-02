@@ -152,23 +152,51 @@ void Barrel::attack(Player* player, int x, int y, int z)
 	Inventory* inv = getInventory(player);
 	if(container->itemsCount >= container->maxStackSize) {
 		ItemInstance* ii = create_ItemInstance(container->itemID, container->maxStackSize, container->itemDamage);
-		if(FillingContainer_getFreeSlot(inv) > 0) {
+		int slot = getSlotIfExistItemAndNotFull(inv, container->itemID, container->itemDamage, container->maxStackSize);
+		if(slot >= 0) {
+			ItemInstance* item = FillingContainer_getItem(inv, slot);
+			int i = container->maxStackSize - item->count;
+			item->count += i;
+			container->itemsCount -= i;
+			ii = NULL;
+		} else if(FillingContainer_getFreeSlot(inv) > 0) {
 			FillingContainer_addItem(inv, ii);
+			ii = NULL;
+			container->itemsCount -= container->maxStackSize;
 		} else {
 			dropItem(level, ii, x, y, z);
 			level = NULL;
+			ii = NULL;
+			container->itemsCount -= container->maxStackSize;
 		}
-		ii = NULL;
-		container->itemsCount -= container->maxStackSize;
 	} else if(container->itemsCount > 0) {
 		ItemInstance* ii = create_ItemInstance(container->itemID, container->itemsCount, container->itemDamage);
-		if(FillingContainer_getFreeSlot(inv) > 0) {
+		int slot = getSlotIfExistItemAndNotFull(inv, container->itemID, container->itemDamage, container->maxStackSize);
+		if(slot >= 0) {
+			ItemInstance* item = FillingContainer_getItem(inv, slot);
+			int i = container->itemsCount + item->count;
+			if(i > container->maxStackSize) {
+				item->count = container->maxStackSize;
+				i -= container->maxStackSize;
+				if(FillingContainer_getFreeSlot(inv) > 0) {
+					FillingContainer_addItem(inv, new ItemInstance(container->itemID, i, container->itemDamage));
+				} else {
+					dropItem(level,new ItemInstance(container->itemID, i, container->itemDamage), x, y, z);
+				}
+				container->itemsCount = 0;
+			} else {
+				item->count += container->itemsCount;
+				container->itemsCount = 0;
+			}
+		} else if(FillingContainer_getFreeSlot(inv) > 0) {
 			FillingContainer_addItem(inv, ii);
+			ii = NULL;
+			container->itemsCount = 0;
 		} else {
 			dropItem(level, ii, x, y, z);
 			level = NULL;
+			ii = NULL;
+			container->itemsCount = 0;
 		}
-		ii = NULL;
-		container->itemsCount = 0;
 	}
 }

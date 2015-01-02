@@ -113,9 +113,10 @@ static void Gui$render(Gui* gui, float wtf, bool idk, int idk2, int idk3)
 		if(result->type == HitResultType::TILE &&  tile.id == BARREL_ID)
 		{
 			std::string id = getIdentifier(g_level, result->tile.x, result->tile.y, result->tile.z);
-			Container* container = g_barrel->containers.at(id);
-			if(container != NULL && container->itemID > 0)
+			Container* container = g_barrel->containers[id];
+			if(container != NULL && container->itemID != 0 )
 			{
+				//LOGI("%d, %d, %d, %d, %d", container->itemID, container->itemDamage, container->itemsCount, container->maxItems, container->maxStackSize);
 				Color color;
 				if(container->itemID == container->maxItems)
 				{
