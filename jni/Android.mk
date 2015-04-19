@@ -16,8 +16,8 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE    := net.inusualz.mcpelauncher.addon.storageex # should match the name in the AndroidManifest.xml
-LOCAL_SRC_FILES := main.cpp Barrel.cpp Utils.cpp Container.cpp
+LOCAL_MODULE    := storageex # should match the name in the AndroidManifest.xml
+LOCAL_SRC_FILES := main.cpp Utils.cpp Barrel.cpp BarrelEntity.cpp
 # search for libraries in the jni/ folder of our project,
 # link to the libraries for printing to logcat, getting methods from libminecraftpe,
 # and for accessing BlockLauncher functions

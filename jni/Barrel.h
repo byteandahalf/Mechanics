@@ -1,32 +1,23 @@
-#ifndef BARREL_H_
-#define BARREL_H_
+#pragma once
 
-#define BARREL_ID 201
+#include "mcpe/Tile/EntityTile.h"
+#include "mcpe/entity/player/Player.h"
+#include "mcpe/level/TileSource.h"
+#include "mcpe/util/Random.h"
 
-#include <map>
-#include <math.h>
-#include <mcpe.h>
-
-#include "Container.h"
-#include "Utils.h"
-
-
-class Barrel : public Tile
+class Barrel : public EntityTile
 {
 public:
-	std::map<std::string, Container*> containers;
-
-public:
+	static const int BARREL_ID = 205;
+	
 	Barrel(int id);
 
 	virtual bool use(Player*, int, int, int);
 	virtual void attack(Player*, int, int, int);
-	virtual void onPlace(TileSource*, int, int, int);
 	virtual void onRemove(TileSource*, int, int, int);
 	virtual int getColor(TileSource*, int, int, int);
 	virtual int getColor(int);
 	virtual int getResource(int, Random*); // 32
 	virtual int getResourceCount(Random*); // 33
-
 };
-#endif
+

@@ -39,3 +39,6 @@ proguard/
 *.cproject
 *.project
 .settings/
+
+#Minecraft Pocket Edition Header Folders
+jni/mcpe/

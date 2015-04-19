@@ -1,9 +1,12 @@
 #include "Barrel.h"
+#include "BarrelEntity.h"
+#include "Utils.h"
 
-Barrel::Barrel(int id) : Tile(id, "cobblestone", &Material::wood)
+Barrel::Barrel(int id) : EntityTile(id, "log", &Material::wood)
 {
+	this->setDescriptionId("barrel");
 	this->setDestroyTime(0.5);
-	this->setDescriptionId("Barrel");
+	this->tileEntityType = TileEntityType::Barrel;
 }
 
 int Barrel::getColor(TileSource*, int, int, int)
@@ -26,109 +29,70 @@ int Barrel::getResourceCount(Random* rand)
 	return 1;
 }
 
-
-void Barrel::onPlace(TileSource* ts, int x, int y, int z)
-{
-	Level* level = TileSource_getLevel(ts);
-	std::string id = getIdentifier(level, x, y, z);
-	this->containers[id] = new Container(LevelData_getLevelName(Level_getLevelData(level)), x, y, z);
-}
-
 void Barrel::onRemove(TileSource* ts, int x, int y, int z)
 {
-	Level* level = TileSource_getLevel(ts);
-	std::string id = getIdentifier(level, x, y, z);
-	Container* container = this->containers[id];
+	BarrelEntity* container = (BarrelEntity*)ts->getTileEntity(x, y, z);
 	if(container == NULL)
 		return;
 
-	while(container->itemsCount > 0 && container->itemID != 0)
+	while(container->itemCount > 0 && container->itemInstance->getId() != 0)
 	{
-		if(container->itemsCount >= container->maxStackSize) {
-			ItemInstance* ii = create_ItemInstance(container->itemID, container->maxStackSize, container->itemDamage);
-			dropItem(level, ii, x, y, z);
-			container->itemsCount -= container->maxStackSize;
+		if(container->itemCount >= container->itemInstance->getMaxStackSize()) {
+			ItemInstance* ii = new ItemInstance(container->itemInstance->getId(), container->itemInstance->getMaxStackSize(), container->itemInstance->auxValue);
+			dropItem(ts, ii, x, y, z);
+			container->itemCount -= container->itemInstance->getMaxStackSize();
 		} else {
-			ItemInstance* ii = create_ItemInstance(container->itemID, container->itemsCount, container->itemDamage);
-			dropItem(level, ii, x, y, z);
-			container->itemsCount -= container->itemsCount;
+			ItemInstance* ii = new ItemInstance(container->itemInstance->getId(), container->itemCount, container->itemInstance->auxValue);
+			dropItem(ts, ii, x, y, z);
+			container->itemCount -= container->itemCount;
 		}
 	}
-	this->containers.erase(id);
 }
 
 bool Barrel::use(Player* player, int x, int y, int z)
 {
-	Level* level = getLevel(player);
-	std::string ident = getIdentifier(level, x, y, z);
-	Container* container = this->containers[ident];
+	BarrelEntity* container = (BarrelEntity*)player->region->getTileEntity(x, y, z);
 	if(container == NULL)
-	{
-		container = new Container(LevelData_getLevelName(Level_getLevelData(level)), x, y, z);
-		this->containers[ident] = container;
-	}
+		return false;
 
-	ItemInstance* instance = Player_getCarriedItem(player);
-	if(container->itemID == 0 && instance != NULL && ItemInstance_isStackable(instance)) {
-		container->itemID = ItemInstance_getID(instance);
-		container->maxStackSize = ItemInstance_getMaxStackSize(instance);
-		container->maxItems =  container->maxStackSize * 36;
-		container->itemDamage = instance->damage;
-		container->itemsCount += instance->count;
+	ItemInstance* instance = player->getSelectedItem();
+	if(container->itemInstance->isNull() && instance != NULL && instance->isStackable()) {
+		container->itemInstance = ItemInstance::clone(instance);
+		container->maxItems =  container->itemInstance->getMaxStackSize() * 36;
+		container->itemCount += instance->count;
 
-		Inventory* inv = getInventory(player);
-		int slot = ((int*) inv)[10]; // From BlockLauncher
-		FillingContainer_clearSlot(inv, slot);
+		player->inventory->clearSlot(player->inventory->selected);
 		
-#if DEBUG
-		__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Inserted item to barrel!. Barrel Container(ID = %d, Damage = %d, MaxStackSize = %d, MaxItems = %d)", container->itemID, container->itemDamage, container->maxStackSize, container->maxItems);
-#endif
-	} else if(instance == NULL && container->itemsCount > 0) {
-		Inventory* inv = getInventory(player);
-		int slot = getSlotIfExistItemAndNotFull(inv, container->itemID, container->itemDamage, container->maxStackSize);
+	} else if((instance == NULL || instance->getId() != container->itemInstance->getId()) && container->itemCount > 0) {
+		Inventory* inv = player->inventory;
+		int slot = getSlotIfExistItemAndNotFull(inv, container->itemInstance->getId(), container->itemInstance->auxValue, container->itemInstance->getMaxStackSize());
 		if(slot >= 0) { //If player have stack of the item incomplete
-			ItemInstance* retval = FillingContainer_getItem(inv, slot); 
-			retval->count += 1;
-			container->itemsCount -= 1;
-		} else if(FillingContainer_getFreeSlot(inv) > 0) { // if player have some space free
-			ItemInstance* itemInstance = create_ItemInstance(container->itemID, 1, container->itemDamage);
-			FillingContainer_addItem(inv, itemInstance);
-			container->itemsCount -= itemInstance->count;
+			inv->getItem(slot)->count += 1;
+		} else if(inv->getFreeSlot() > 0) { // if player have some space free
+			inv->addItem(new ItemInstance(container->itemInstance->getId(), 1, container->itemInstance->auxValue));
 		} else { // Drop Item to the floor.
-			ItemInstance* itemInstance = create_ItemInstance(container->itemID, 1, container->itemDamage);
-			Level* level = getLevel(player);
-			dropItem(level, itemInstance, x, y, z);
-			container->itemsCount -= 1;
+			dropItem(player->region, new ItemInstance(container->itemInstance->getId(), 1, container->itemInstance->auxValue), x, y, z);
 		}
+		container->itemCount -= 1;
 	} else if(instance != NULL && 
-			 (instance->damage == container->itemDamage)   && 
-			 (container->itemsCount > 0) 				   && 
-			 (container->itemsCount < container->maxItems) &&
-			 (ItemInstance_getID(instance) == container->itemID))   {
+			 (instance->auxValue == container->itemInstance->auxValue)   && 
+			 (container->itemCount > 0) 				   && 
+			 (container->itemCount < container->maxItems) &&
+			 (instance->getId() == container->itemInstance->getId()))   {
 
-		Inventory* inv = getInventory(player);
-		int slot = ((int*) inv)[10]; // From BlockLauncher
-
-		ItemInstance* itemInstance = FillingContainer_getItem(inv, slot);
-		if((container->itemsCount + itemInstance->count) > container->maxItems)
+		if((container->itemCount + instance->count) > container->maxItems)
 		{
-			int i = (container->itemsCount + instance->count) - container->maxItems;
-			itemInstance->count = i;
-			container->itemsCount = container->maxItems;
+			int i = (container->itemCount + instance->count) - container->maxItems;
+			instance->count = i;
+			container->itemCount = container->maxItems;
 		}else {
-			container->itemsCount += instance->count;
-			FillingContainer_clearSlot(inv, slot);
+			container->itemCount += instance->count;
+			player->inventory->clearSlot(player->inventory->selected);
 		}
 	}
 
-	if(container->itemsCount <= 0  && container->locked == false)
-	{
-		container->itemID = 0;
-		container->maxStackSize = 0;
-		container->maxItems =  0;
-		container->itemDamage = 0;
-		container->itemsCount = 0;
-	}
+	if(container->itemCount <= 0)
+		container->clear();
 
 	if(instance == NULL)
 		return false;
@@ -140,63 +104,50 @@ bool Barrel::use(Player* player, int x, int y, int z)
 
 void Barrel::attack(Player* player, int x, int y, int z)
 {
-	Level* level = getLevel(player);
-	std::string id = getIdentifier(level, x, y, z);
-	Container* container = this->containers.at(id);
-	if(container == NULL || container->itemID == 0)
-	{
-		container = new Container(LevelData_getLevelName(Level_getLevelData(level)), x, y, z);
-		this->containers[id] = container;
-	}
+	BarrelEntity* container = (BarrelEntity*)player->region->getTileEntity(x, y, z);
+	if(container == NULL || container->itemInstance->getId() <= 0)
+		return;
 
-	Inventory* inv = getInventory(player);
-	if(container->itemsCount >= container->maxStackSize) {
-		ItemInstance* ii = create_ItemInstance(container->itemID, container->maxStackSize, container->itemDamage);
-		int slot = getSlotIfExistItemAndNotFull(inv, container->itemID, container->itemDamage, container->maxStackSize);
+	Inventory* inv = player->inventory;
+	if(container->itemCount >= container->itemInstance->getMaxStackSize()) {
+		ItemInstance* ii = new ItemInstance(container->itemInstance->getId(), container->itemInstance->getMaxStackSize(), container->itemInstance->auxValue);
+		int slot = getSlotIfExistItemAndNotFull(inv, container->itemInstance->getId(), container->itemInstance->auxValue, container->itemInstance->getMaxStackSize());
 		if(slot >= 0) {
-			ItemInstance* item = FillingContainer_getItem(inv, slot);
-			int i = container->maxStackSize - item->count;
+			ItemInstance* item = inv->getItem(slot);
+			int i = container->itemInstance->getMaxStackSize() - item->count;
 			item->count += i;
-			container->itemsCount -= i;
-			ii = NULL;
-		} else if(FillingContainer_getFreeSlot(inv) > 0) {
-			FillingContainer_addItem(inv, ii);
-			ii = NULL;
-			container->itemsCount -= container->maxStackSize;
+			container->itemCount -= i;
+			delete ii;
+		} else if(inv->getFreeSlot() > 0) {
+			inv->addItem(ii);
+			container->itemCount -= container->itemInstance->getMaxStackSize();
 		} else {
-			dropItem(level, ii, x, y, z);
-			level = NULL;
-			ii = NULL;
-			container->itemsCount -= container->maxStackSize;
+			dropItem(player->region, ii, x, y, z);
+			container->itemCount -= container->itemInstance->getMaxStackSize();
 		}
-	} else if(container->itemsCount > 0) {
-		ItemInstance* ii = create_ItemInstance(container->itemID, container->itemsCount, container->itemDamage);
-		int slot = getSlotIfExistItemAndNotFull(inv, container->itemID, container->itemDamage, container->maxStackSize);
+	} else if(container->itemCount > 0) {
+		ItemInstance* ii = new ItemInstance(container->itemInstance->getId(), container->itemCount, container->itemInstance->auxValue);
+		int slot = getSlotIfExistItemAndNotFull(inv, container->itemInstance->getId(), container->itemInstance->auxValue, container->itemInstance->getMaxStackSize());
 		if(slot >= 0) {
-			ItemInstance* item = FillingContainer_getItem(inv, slot);
-			int i = container->itemsCount + item->count;
-			if(i > container->maxStackSize) {
-				item->count = container->maxStackSize;
-				i -= container->maxStackSize;
-				if(FillingContainer_getFreeSlot(inv) > 0) {
-					FillingContainer_addItem(inv, new ItemInstance(container->itemID, i, container->itemDamage));
+			ItemInstance* item = inv->getItem(slot);
+			int i = container->itemCount + item->count;
+			if(i > container->itemInstance->getMaxStackSize()) {
+				item->count = container->itemInstance->getMaxStackSize();
+				i -= container->itemInstance->getMaxStackSize();
+				if(inv->getFreeSlot() > 0) {
+					inv->addItem(new ItemInstance(container->itemInstance->getId(), i, container->itemInstance->auxValue));
 				} else {
-					dropItem(level,new ItemInstance(container->itemID, i, container->itemDamage), x, y, z);
+					dropItem(player->region, new ItemInstance(container->itemInstance->getId(), i, container->itemInstance->auxValue), x, y, z);
 				}
-				container->itemsCount = 0;
 			} else {
-				item->count += container->itemsCount;
-				container->itemsCount = 0;
+				item->count += container->itemCount;
 			}
-		} else if(FillingContainer_getFreeSlot(inv) > 0) {
-			FillingContainer_addItem(inv, ii);
-			ii = NULL;
-			container->itemsCount = 0;
+			delete ii;
+		} else if(inv->getFreeSlot() > 0) {
+			inv->addItem(ii);
 		} else {
-			dropItem(level, ii, x, y, z);
-			level = NULL;
-			ii = NULL;
-			container->itemsCount = 0;
+			dropItem(player->region, ii, x, y, z);
 		}
+		container->clear();
 	}
 }
