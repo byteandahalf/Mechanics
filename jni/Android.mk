@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := storageex # should match the name in the AndroidManifest.xml
-LOCAL_SRC_FILES := main.cpp Utils.cpp Barrel.cpp BarrelEntity.cpp
-# search for libraries in the jni/ folder of our project,
-# link to the libraries for printing to logcat, getting methods from libminecraftpe,
-# and for accessing BlockLauncher functions
+LOCAL_SRC_FILES := main.cpp Utils.cpp tile/Barrel.cpp tile/entity/BarrelEntity.cpp
+
 LOCAL_LDLIBS    := -L$(LOCAL_PATH) -llog -ldl -lminecraftpe -lmcpelauncher_tinysubstrate
+
+LOCAL_CFLAGS          := -pthread
 
 # ignore undefined symbols.
 # workaround for method not found errors.

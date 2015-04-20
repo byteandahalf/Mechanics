@@ -1,7 +1,5 @@
 #pragma once
 
-#include <android/log.h>
-
 #include "mcpe/Tile/entity/TileEntity.h"
 
 #define BARREL_STRING_ID "Barrel"

@@ -4,10 +4,13 @@
 #include <string>
 #include <time.h>
 #include <stdlib.h>
+#include <sstream>
 
 #include "Substrate.h"
-#include "Barrel.h"
-#include "BarrelEntity.h"
+#include "mcpe/Recipes.h"
+#include "tile/Barrel.h"
+#include "Utils.h"
+#include "tile/entity/BarrelEntity.h"
 #include "mcpe/item/TileItem.h"
 #include "mcpe/tile/entity/SignTileEntity.h"
 #include "mcpe/tile/entity/ChestTileEntity.h"
@@ -15,7 +18,74 @@
 #include "mcpe/tile/entity/MobSpawnerTileEntity.h"
 #include "mcpe/tile/entity/NetherReactorTileEntity.h"
 
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "inusualz", __VA_ARGS__))
+#include "mcpe/gui/gui/Gui.h"
+#include "mcpe/item/ItemRenderer.h"
+#include "mcpe/game/MinecraftClient.h"
+#include "mcpe/entity/item/ItemEntity.h"
+
+#define MINECRAFT_HIT_RESULT_OFFSET 2680
+
+int screen_width = 0;
+int screen_height = 0;
+bool registered;
+
+static void (*_Gui$render)(Gui*, float, bool, int, int);
+static void Gui$render(Gui* gui, float wtf, bool idk, int idk2, int idk3)
+{
+	_Gui$render(gui, wtf,idk, idk2, idk3);
+	
+	Player* player = gui->minecraft.getPlayer();
+	TileSource* tileSource = player->region;
+	HitResult* result = (HitResult*) ((uintptr_t) player->level + MINECRAFT_HIT_RESULT_OFFSET);// I don't know why `&player->level->hitResult` don't work. Maybe outdated class?
+
+	Tile* tile = tileSource->getTilePtr(result->tile);
+	if(result->type == HitResultType::TILE && tile ==  Tile::tiles[Barrel::BARREL_ID])
+	{
+		BarrelEntity* container = (BarrelEntity*)tileSource->getTileEntity(result->tile);
+		if(container != NULL && container->itemInstance->getId() != 0 )
+		{
+			Color color;
+			if(container->itemCount == container->maxItems)
+			{
+				color.r = 255;
+				color.g = 0;
+				color.b = 0;
+				color.a = 255;
+			}
+			else if((container->itemCount / container->maxItems) >= 0.80)
+			{
+				color.r = 255;
+				color.g = 255;
+				color.b = 0;
+				color.a = 255;
+			}
+			else
+			{
+				color.r = 0;
+				color.g = 255;
+				color.b = 0;
+				color.a = 255;
+			}
+
+			std::stringstream str;
+			str << "Items Count: " << container->itemCount << "/" << container->maxItems;
+			str << "(" << ((float)(container->itemCount / container->itemInstance->getMaxStackSize())) << "/" << (container->maxItems / container->itemInstance->getMaxStackSize()) << ")";
+			std::string temp = str.str();
+			gui->minecraft.font->draw(temp, ((screen_width / 2) - (temp.length() * 2)), 10, color);
+			ItemRenderer::singleton().renderGuiItemNew(gui->minecraft.textures.get(), new ItemInstance(container->itemInstance->getId(), 1, container->itemInstance->auxValue), 0, (screen_width / 2), 30, 1, 2, 2);
+		}
+	}
+
+}
+
+
+static void (*_Screen$setSize)(Screen*, int, int);
+static void Screen$setSize(Screen* screen, int width, int height)
+{
+	_Screen$setSize(screen, width, height);
+	screen_width = width;
+	screen_height = height;
+}
 
 static void (*_Item$initItems)();
 static void Item$initItems()
@@ -58,6 +128,33 @@ static TileEntity* TileEntityFactory$createTileEntity(TileEntityType type, const
 	return _TileEntityFactory$createTileEntity(type, pos);
 }
 
+static void (*_SurvivalScreen_updateCraftingItem)(void*, bool);
+static void SurvivalScreen_updateCraftingItem(void* screen, bool idk)
+{
+	_SurvivalScreen_updateCraftingItem(screen, idk);
+
+	if(registered)
+		return;
+	
+	
+	std::vector<std::string> shape  = { "wsw", "w w", "www"};
+	std::vector<Recipes::Type> ingredients;
+	Recipes::Type wood;
+	wood.c = 'w';
+	wood.item = NULL;
+	wood.tile = Tile::tiles[17];
+	ingredients.push_back(wood);
+
+	Recipes::Type slab;
+	slab.c = 's';
+	slab.item = Item::items[158];
+	slab.tile = NULL;
+	ingredients.push_back(slab);
+	
+	Recipes::getInstance()->addShapedRecipe(ItemInstance(Barrel::BARREL_ID, 1, 0), shape, ingredients);
+	registered = true;
+}
+
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
     MSHookFunction((void*)&Item::initItems, (void*)&Item$initItems, (void**)&_Item$initItems);
@@ -70,7 +167,14 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     void* I18n$get_ = dlsym(RTLD_DEFAULT, "_ZN4I18n3getERKSs");
     MSHookFunction(I18n$get_, (void*) &I18n$get, (void**) &_I18n$get);
 
+    void* screen$setSize = dlsym(RTLD_DEFAULT, "_ZN6Screen7setSizeEii");
+	MSHookFunction(screen$setSize, (void*)&Screen$setSize, (void**)&_Screen$setSize);
 
+	void* gui$render = dlsym(RTLD_DEFAULT, "_ZN3Gui6renderEfbii");
+	MSHookFunction(gui$render, (void*)&Gui$render, (void**)&_Gui$render);
+	
+	void* survival_item = dlsym(RTLD_DEFAULT, "_ZN23SurvivalInventoryScreen20updateCraftableItemsEb");
+	MSHookFunction(survival_item, (void*)&SurvivalScreen_updateCraftingItem, (void**)&_SurvivalScreen_updateCraftingItem);
 
 	return JNI_VERSION_1_2;
 }

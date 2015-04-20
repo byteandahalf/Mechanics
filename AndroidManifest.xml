@@ -12,8 +12,8 @@
     <application android:label="@string/app_name" android:hasCode="false">
 
     <!-- metadata specifying the library name. must match Android.mk.-->
-    <meta-data android:name="net.zhuoweizhang.mcpelauncher.api.nativelibname"
-        android:value="net.inusualz.mcpelauncher.addon.storageex"/>
+    <meta-data android:name="net.zhuoweizhang.mcpelauncher.api.nativelibname" android:value="storageex"/>
+    <meta-data android:name="net.zhuoweizhang.mcpelauncher.api.targetmcpeversion" android:value="0.10.5"/>
     </application>
 
 </manifest> 

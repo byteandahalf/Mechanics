@@ -24,4 +24,9 @@ void dropItem(TileSource*, ItemInstance*, float, float, float);
 
 void bl_dumpVtable(void** vtable, size_t size);
 
+template<typename Base, typename T>
+inline bool instanceof(const T*) {
+    return std::is_base_of<Base, T>::value;
+}
+
 #endif
