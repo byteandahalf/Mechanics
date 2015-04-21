@@ -27,7 +27,7 @@
 
 int screen_width = 0;
 int screen_height = 0;
-bool registered;
+bool registered = false;
 
 static void (*_Gui$render)(Gui*, float, bool, int, int);
 static void Gui$render(Gui* gui, float wtf, bool idk, int idk2, int idk3)
@@ -45,28 +45,12 @@ static void Gui$render(Gui* gui, float wtf, bool idk, int idk2, int idk3)
 		if(container != NULL && container->itemInstance->getId() != 0 )
 		{
 			Color color;
-			if(container->itemCount == container->maxItems)
-			{
-				color.r = 255;
-				color.g = 0;
-				color.b = 0;
-				color.a = 255;
-			}
-			else if((container->itemCount / container->maxItems) >= 0.80)
-			{
-				color.r = 255;
-				color.g = 255;
-				color.b = 0;
-				color.a = 255;
-			}
-			else
-			{
-				color.r = 0;
-				color.g = 255;
-				color.b = 0;
-				color.a = 255;
-			}
-
+			
+			color.r = ((container->itemCount / container->maxItems) >= 0.80) ? 255 : 0;
+			color.g = (container->itemCount == container->maxItems) ? 0 : 255;
+			color.b = 0;
+			color.a = 255;
+	
 			std::stringstream str;
 			str << "Items Count: " << container->itemCount << "/" << container->maxItems;
 			str << "(" << ((float)(container->itemCount / container->itemInstance->getMaxStackSize())) << "/" << (container->maxItems / container->itemInstance->getMaxStackSize()) << ")";
