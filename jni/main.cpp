@@ -42,7 +42,7 @@ static void Gui$render(Gui* gui, float wtf, bool idk, int idk2, int idk3)
 	if(result->type == HitResultType::TILE && tile ==  Tile::tiles[Barrel::BARREL_ID])
 	{
 		BarrelEntity* container = (BarrelEntity*)tileSource->getTileEntity(result->tile);
-		if(container != NULL && container->itemInstance->getId() != 0 )
+		if(container != NULL && container->itemInstance != NULL)
 		{
 			Color color;
 			

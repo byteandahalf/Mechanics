@@ -1,37 +1,36 @@
-#include "Barrel.h"
-#include "entity/BarrelEntity.h"
+#include "EnderBarrel.h"
 #include "Utils.h"
 
-Barrel::Barrel(int id) : EntityTile(id, "log", &Material::wood)
+EnderBarrel::EnderBarrel(int id) : EntityTile(id, "log", &Material::wood)
 {
-	this->setDescriptionId("barrel");
+	this->setDescriptionId("EnderBarrel");
 	this->setDestroyTime(0.5);
-	this->tileEntityType = TileEntityType::Barrel;
+	this->tileEntityType = TileEntityType::EnderBarrel;
 }
 
-int Barrel::getColor(TileSource*, int, int, int)
+int EnderBarrel::getColor(TileSource*, int, int, int)
 {
 	return 0xff763500;
 }
 
-int Barrel::getColor(int idk)
+int EnderBarrel::getColor(int idk)
 {
 	return 0xff763500;
 }
 
-int Barrel::getResource(int idk, Random* rand)
+int EnderBarrel::getResource(int idk, Random* rand)
 {
-	return BARREL_ID;
+	return EnderBarrel_ID;
 }
 
-int Barrel::getResourceCount(Random* rand)
+int EnderBarrel::getResourceCount(Random* rand)
 {
 	return 1;
 }
 
-void Barrel::onRemove(TileSource* ts, int x, int y, int z)
+void EnderBarrel::onRemove(TileSource* ts, int x, int y, int z)
 {
-	BarrelEntity* container = (BarrelEntity*)ts->getTileEntity(x, y, z);
+	BarrelEntity* container = (EnderBarrelEntity*)ts->getTileEntity(x, y, z);
 	if(container == NULL)
 		return;
 
@@ -47,21 +46,19 @@ void Barrel::onRemove(TileSource* ts, int x, int y, int z)
 			container->itemCount -= container->itemCount;
 		}
 	}
-	
-	container->setChanged();
 }
 
-bool Barrel::use(Player* player, int x, int y, int z)
+bool EnderBarrel::use(Player* player, int x, int y, int z)
 {
-	BarrelEntity* container = (BarrelEntity*)player->region->getTileEntity(x, y, z);
+	EnderBarrelEntity* container = (EnderBarrelEntity*)player->region->getTileEntity(x, y, z);
 	if(container == NULL)
 		return false;
 
 	ItemInstance* instance = player->getSelectedItem();
-	if(container->itemInstance == NULL && instance != NULL) {
-		container->maxItems =  instance->getMaxStackSize() * 64;
-		container->itemCount = instance->count;
+	if(container->itemInstance->isNull() && instance != NULL && instance->isStackable()) {
 		container->itemInstance = ItemInstance::clone(instance);
+		container->maxItems =  container->itemInstance->getMaxStackSize() * 64;
+		container->itemCount += instance->count;
 
 		player->inventory->clearSlot(player->inventory->selected);
 		
@@ -76,18 +73,23 @@ bool Barrel::use(Player* player, int x, int y, int z)
 			dropItem(player->region, new ItemInstance(container->itemInstance->getId(), 1, container->itemInstance->auxValue), x, y, z);
 		}
 		container->itemCount -= 1;
-	} else if(container->itemInstance->sameItemAndAux(instance) && (container->itemCount > 0) && (container->itemCount < container->maxItems))   {
-		if((container->itemCount + instance->count) > container->maxItems) {
-			instance->count = (container->itemCount + instance->count) - container->maxItems;
+	} else if(instance != NULL && 
+			 (instance->auxValue == container->itemInstance->auxValue)   && 
+			 (container->itemCount > 0) 				   && 
+			 (container->itemCount < container->maxItems) &&
+			 (instance->getId() == container->itemInstance->getId()))   {
+
+		if((container->itemCount + instance->count) > container->maxItems)
+		{
+			int i = (container->itemCount + instance->count) - container->maxItems;
+			instance->count = i;
 			container->itemCount = container->maxItems;
-		} else {
+		}else {
 			container->itemCount += instance->count;
 			player->inventory->clearSlot(player->inventory->selected);
 		}
 	}
 
-	container->setChanged();
-	
 	if(container->itemCount <= 0)
 		container->clear();
 
@@ -99,10 +101,10 @@ bool Barrel::use(Player* player, int x, int y, int z)
 
 
 
-void Barrel::attack(Player* player, int x, int y, int z)
+void EnderBarrel::attack(Player* player, int x, int y, int z)
 {
-	BarrelEntity* container = (BarrelEntity*)player->region->getTileEntity(x, y, z);
-	if(container == NULL || container->itemInstance == NULL)
+	EnderBarrelEntity* container = (EnderBarrelEntity*)player->region->getTileEntity(x, y, z);
+	if(container == NULL || container->itemInstance->getId() <= 0)
 		return;
 
 	Inventory* inv = player->inventory;
@@ -147,8 +149,4 @@ void Barrel::attack(Player* player, int x, int y, int z)
 		}
 		container->clear();
 	}
-	
-	container->setChanged();
 }
-
-

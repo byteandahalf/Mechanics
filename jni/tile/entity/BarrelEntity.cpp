@@ -12,8 +12,7 @@ BarrelEntity::BarrelEntity(const TilePos& pos) : TileEntity(TileEntityType::Barr
 	this->tile = Tile::tiles[Barrel::BARREL_ID];
 	this->rendererId = TileEntityRendererId::TR_DEFAULT_RENDERER;
 
-	this->itemInstance = new ItemInstance();
-	this->itemInstance->setNull();
+	this->itemInstance = NULL;
 	this->isLocked = false;
 	this->itemCount = 0;
 	this->maxItems = 0;
@@ -21,10 +20,10 @@ BarrelEntity::BarrelEntity(const TilePos& pos) : TileEntity(TileEntityType::Barr
 
 void BarrelEntity::load(CompoundTag* compoundTag)
 {	
-	CompoundTag* item = (CompoundTag*)compoundTag->tags["Item"];
-	this->itemInstance = new ItemInstance(((IntTag*)item->tags["ItemID"])->data, 1, ((IntTag*)item->tags["ItemDamage"])->data);
-	this->itemCount = ((IntTag*)item->tags["ItemCount"])->data;
-
+	if(compoundTag->tags["Item"] != NULL)
+		this->itemInstance = ItemInstance::fromTag((CompoundTag*)compoundTag->tags["Item"]);
+	
+	this->itemCount = ((IntTag*)compoundTag->tags["ItemCount"])->data;
 	this->isLocked = ((ByteTag*)compoundTag->tags["Locked"])->data == 0x01 ? true : false;
 	this->maxItems = ((IntTag*)compoundTag->tags["MaxItems"])->data;
 }
@@ -33,15 +32,14 @@ bool BarrelEntity::save(CompoundTag* compoundTag)
 {
 	TileEntity::save(compoundTag);
 
-	CompoundTag* item = (CompoundTag*)Tag::newTag(Tag::TAG_Compound, "Item");
-		item->putInt("ItemID", this->itemInstance->getId());
-		item->putInt("ItemDamage", this->itemInstance->getAuxValue());
-		item->putInt("ItemCount", this->itemCount);
-	compoundTag->put("Item", item);
-
 	compoundTag->putInt("MaxItems", this->maxItems);
+	compoundTag->putInt("ItemCount", this->itemCount);
+	LOGI("Count: %d", this->itemCount);
+	compoundTag->putByte("Locked", this->isLocked ? 0x01 : 0x00);
+	
+	if(this->itemInstance != NULL)
+		compoundTag->put("Item", this->itemInstance->save((CompoundTag*)Tag::newTag(Tag::TAG_Compound, "Item")));
 
-	compoundTag->putByte("Locked", (char)this->isLocked);
 	return true;
 }
 
@@ -52,8 +50,9 @@ void BarrelEntity::clear()
 		this->itemCount = 0;
 	else 
 	{
-		this->itemInstance->setNull();
+		this->itemInstance = NULL;
 		this->itemCount = 0;
 		this->maxItems = 0;
 	}
+	this->setChanged();
 }
