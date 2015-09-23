@@ -1,35 +1,29 @@
-#include "Barrel.h"
+#include "BarrelTile.h"
 #include "entity/BarrelEntity.h"
 #include "Utils.h"
 
-Barrel::Barrel(int id) : EntityTile(id, "log", &Material::wood)
+#include "MCPE/world/item/ItemInstance.h"
+
+BarrelTile::BarrelTile() : EntityTile(BARREL_ID, "log", &Material::wood)
 {
-	this->setDescriptionId("barrel");
-	this->setDestroyTime(0.5);
+	this->category = 1;
 	this->tileEntityType = TileEntityType::Barrel;
+
+	this->init();
+	this->setNameId("barrel");
+	this->setSoundType(Tile::SOUND_WOOD);
+	this->setDestroyTime(0.5);
+
+	new TileItem(BARREL_ID - 256);
 }
 
-int Barrel::getColor(TileSource*, int, int, int)
-{
-	return 0xff763500;
-}
-
-int Barrel::getColor(int idk)
-{
-	return 0xff763500;
-}
-
-int Barrel::getResource(int idk, Random* rand)
+int BarrelTile::getResource(int idk, Random* rand)
 {
 	return BARREL_ID;
 }
 
-int Barrel::getResourceCount(Random* rand)
-{
-	return 1;
-}
 
-void Barrel::onRemove(TileSource* ts, int x, int y, int z)
+void BarrelTile::onRemove(TileSource* ts, int x, int y, int z)
 {
 	BarrelEntity* container = (BarrelEntity*)ts->getTileEntity(x, y, z);
 	if(container == NULL)
@@ -51,7 +45,7 @@ void Barrel::onRemove(TileSource* ts, int x, int y, int z)
 	container->setChanged();
 }
 
-bool Barrel::use(Player* player, int x, int y, int z)
+bool BarrelTile::use(Player* player, int x, int y, int z)
 {
 	BarrelEntity* container = (BarrelEntity*)player->region->getTileEntity(x, y, z);
 	if(container == NULL)
@@ -63,14 +57,17 @@ bool Barrel::use(Player* player, int x, int y, int z)
 		container->itemCount = instance->count;
 		container->itemInstance = ItemInstance::clone(instance);
 
-		player->inventory->clearSlot(player->inventory->selected);
+		player->inventory->clearSlot(player->inventory->getLinkedSlotForExactItem(*instance));
+		LOGI("Max items: %d ItemCount: %d ItemInstance: %p", container->maxItems, container->itemCount, container->itemInstance);
 		
 	} else if((instance == NULL || instance->getId() != container->itemInstance->getId()) && container->itemCount > 0) {
+		LOGI("Passed #1");
 		Inventory* inv = player->inventory;
 		int slot = getSlotIfExistItemAndNotFull(inv, container->itemInstance->getId(), container->itemInstance->auxValue, container->itemInstance->getMaxStackSize());
 		if(slot >= 0) { //If player have stack of the item incomplete
 			inv->getItem(slot)->count += 1;
 		} else if(inv->getFreeSlot() > 0) { // if player have some space free
+			LOGI("Passed #2");
 			inv->addItem(new ItemInstance(container->itemInstance->getId(), 1, container->itemInstance->auxValue));
 		} else { // Drop Item to the floor.
 			dropItem(player->region, new ItemInstance(container->itemInstance->getId(), 1, container->itemInstance->auxValue), x, y, z);
@@ -87,11 +84,10 @@ bool Barrel::use(Player* player, int x, int y, int z)
 	}
 
 	container->setChanged();
-	
 	if(container->itemCount <= 0)
 		container->clear();
 
-	if(instance == NULL)
+	if(instance == nullptr)
 		return false;
 
 	return true;
@@ -99,7 +95,7 @@ bool Barrel::use(Player* player, int x, int y, int z)
 
 
 
-void Barrel::attack(Player* player, int x, int y, int z)
+void BarrelTile::attack(Player* player, int x, int y, int z)
 {
 	BarrelEntity* container = (BarrelEntity*)player->region->getTileEntity(x, y, z);
 	if(container == NULL || container->itemInstance == NULL)
@@ -150,5 +146,3 @@ void Barrel::attack(Player* player, int x, int y, int z)
 	
 	container->setChanged();
 }
-
-

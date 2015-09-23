@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mcpe/Tile/entity/TileEntity.h"
+#include "MCPE/world/level/tile/entity/TileEntity.h"
 
 #define BARREL_STRING_ID "Barrel"
 

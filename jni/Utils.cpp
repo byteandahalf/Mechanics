@@ -1,6 +1,7 @@
 #include "Utils.h"
 
-#include "mcpe/entity/item/ItemEntity.h"
+#include "MCPE/world/entity/item/ItemEntity.h"
+#include "MCPE/world/entity/player/Player.h"
 
 int getSlotIfExistItemAndNotFull(Inventory* inv, int id, int damage, int maxStack)
 {
@@ -16,7 +17,7 @@ int getSlotIfExistItemAndNotFull(Inventory* inv, int id, int damage, int maxStac
 
 void dropItem(TileSource* tileSource, ItemInstance* instance, float x, float y, float z)
 {
-	tileSource->getLevel().addEntity(new ItemEntity(*tileSource, x, y, z, *instance));
+	tileSource->getLevel()->addEntity(std::unique_ptr<Entity>(new ItemEntity(*tileSource, x, y, z, *instance)));
 }
 
 

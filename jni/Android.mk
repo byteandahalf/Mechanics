@@ -1,28 +1,17 @@
-# Copyright (C) 2010 The Android Open Source Project
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE    := storageex # should match the name in the AndroidManifest.xml
-LOCAL_SRC_FILES := main.cpp Utils.cpp tile/Barrel.cpp tile/entity/BarrelEntity.cpp
+MECHANICS_TILE_ENTITY := Mechanics/tile/entity/
+MECHANICS_TILE = Mechanics/tile/
+
+LOCAL_MODULE    := mechanics
+
+LOCAL_SRC_FILES_RAW := $(shell dir *.cpp /b/s)
+LOCAL_SRC_FILES := $(LOCAL_SRC_FILES_RAW:$(LOCAL_PATH)/%=%)
+#main.cpp $(MECHANICS_TILE_ENTITY)GrinderEntity.cpp $(MECHANICS_TILE)Grinder.cpp 
 
 LOCAL_LDLIBS    := -L$(LOCAL_PATH) -llog -ldl -lminecraftpe -lmcpelauncher_tinysubstrate
-
-LOCAL_CFLAGS          := -pthread
 
 # ignore undefined symbols.
 # workaround for method not found errors.

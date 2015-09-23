@@ -1,16 +1,17 @@
 #include "BarrelEntity.h"
-#include "../Barrel.h"
-#include "Utils.h"
+#include "../BarrelTile.h"
 
-#include "mcpe/nbt/CompoundTag.h"
-#include "mcpe/nbt/IntTag.h"
-#include "mcpe/nbt/StringTag.h"
-#include "mcpe/nbt/ByteTag.h"
+#include "CTypes.h"
+
+#include "MCPE/nbt/CompoundTag.h"
+#include "MCPE/nbt/IntTag.h"
+#include "MCPE/nbt/StringTag.h"
+#include "MCPE/nbt/ByteTag.h"
 
 BarrelEntity::BarrelEntity(const TilePos& pos) : TileEntity(TileEntityType::Barrel, pos, BARREL_STRING_ID)
 {
-	this->tile = Tile::tiles[Barrel::BARREL_ID];
-	this->rendererId = TileEntityRendererId::TR_DEFAULT_RENDERER;
+	this->rendererId = 0;
+	this->tile = Tile::tiles[BarrelTile::BARREL_ID];
 
 	this->itemInstance = NULL;
 	this->isLocked = false;
@@ -19,9 +20,11 @@ BarrelEntity::BarrelEntity(const TilePos& pos) : TileEntity(TileEntityType::Barr
 }
 
 void BarrelEntity::load(CompoundTag* compoundTag)
-{	
+{
+	return;
+	
 	if(compoundTag->tags["Item"] != NULL)
-		this->itemInstance = ItemInstance::fromTag((CompoundTag*)compoundTag->tags["Item"]);
+		this->itemInstance = ItemInstance::fromTag(*((CompoundTag*)compoundTag->tags["Item"]));
 	
 	this->itemCount = ((IntTag*)compoundTag->tags["ItemCount"])->data;
 	this->isLocked = ((ByteTag*)compoundTag->tags["Locked"])->data == 0x01 ? true : false;
@@ -34,11 +37,10 @@ bool BarrelEntity::save(CompoundTag* compoundTag)
 
 	compoundTag->putInt("MaxItems", this->maxItems);
 	compoundTag->putInt("ItemCount", this->itemCount);
-	LOGI("Count: %d", this->itemCount);
 	compoundTag->putByte("Locked", this->isLocked ? 0x01 : 0x00);
 	
 	if(this->itemInstance != NULL)
-		compoundTag->put("Item", this->itemInstance->save((CompoundTag*)Tag::newTag(Tag::TAG_Compound, "Item")));
+		compoundTag->putCompound("Item", std::unique_ptr<CompoundTag>(this->itemInstance->save()));
 
 	return true;
 }
