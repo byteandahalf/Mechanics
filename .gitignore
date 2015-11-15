@@ -40,8 +40,4 @@ proguard/
 *.project
 .settings/
 
-#Minecraft Pocket Edition Header Folders
-jni/mcpe/
-
-jni/libminecraftpe.so
-jni/libmcpelauncher_tinysubstrate.so
+*.sh

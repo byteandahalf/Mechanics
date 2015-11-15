@@ -1,0 +1,16 @@
+TODO(1.0.0):
+	Implement Barrel
+		Implement nice way to show it's content
+	Implement Grinder
+		Implement a nice interface
+	Develop and Imeplement Energy API
+	Implement Power Cell
+	Implement Conductive Cable
+	Implement Crusher
+	Implement ElectricFurnace
+
+TODO(2.0.0):
+	Implement configurable blocks and items ids
+	Implement tranport pipe
+
+

@@ -1,66 +1,93 @@
-#include <dlfcn.h>
-#include <jni.h>
 #include <stdlib.h>
-#include <Substrate.h>
+#include <string>
+#include <memory>
 
-#include "CTypes.h"
+#if defined(ABI_X86)
+	#include "mcpelauncher_api.h"
+#elif defined(ABI_ARM)
+	#include <android/log.h>
+	#include <dlfcn.h>
+	#include <jni.h>
+	#include <substrate.h>
+#endif
 
-#include "MCPE/locale/I18n.h"
+#include "Mechanics.h"
+#include "MCPE/client/MinecraftClient.h"
+#include "MCPE/world/level/block/Block.h"
+#include "MCPE/world/item/Item.h"
+#include "MCPE/world/level/biome/BiomeDecorator.h"
 
-#include "Mechanics/tile/BarrelTile.h"
-#include "Mechanics/tile/entity/BarrelEntity.h"
-#include "Mechanics/tile/GrinderTile.h"
-#include "Mechanics/tile/entity/GrinderEntity.h"
 
-static BarrelTile* g_barrel = nullptr;
-static GrinderTile* g_grinder = nullptr;
 
-static void (*_Tile$initTiles)();
-static void Tile$initTiles() // Init all the tiles
+void (*_Item$initItems)();
+void Item$initItems()
 {
-	_Tile$initTiles();
+	_Item$initItems();
 
-	//Register new blocks
-	g_grinder = new GrinderTile();
-	g_barrel = new BarrelTile();
+	Mechanics::initItems();
 }
 
-static void (*_TileEntity$initTileEntities)();
-static void TileEntity$initTileEntities()
+void (*_Block$initBlocks)();
+void Block$initBlocks() 
 {
-	_TileEntity$initTileEntities();
+	_Block$initBlocks();
 
-	//Register our tile entities.
-	TileEntity::setId(TileEntityType::Grinder, "Grinder");
-	TileEntity::setId(TileEntityType::Barrel, "Barrel");
+	Mechanics::initBlocks();
 }
 
-
-static std::unique_ptr<TileEntity> (*_TileEntityFactory$createTileEntity)(TileEntityType,  TilePos const&);
-static std::unique_ptr<TileEntity> TileEntityFactory$createTileEntity(TileEntityType type, TilePos const& pos)
+//This thing crash I don't know why!!
+void (*_Item$addBlockItems)();
+void Item$addBlockItems()
 {
-	if(type == TileEntityType::Grinder) return std::unique_ptr<TileEntity>(new GrinderEntity(pos));
-	if(type == TileEntityType::Barrel) return std::unique_ptr<TileEntity>(new BarrelEntity(pos));
-	return _TileEntityFactory$createTileEntity(type, pos);
+	_Item$addBlockItems();
+
+	Mechanics::addBlockItems();
 }
 
-
-
-static std::string (*_I18n$get)(std::string const&, std::vector<std::string> const&);
-static std::string I18n$get(std::string const& key, std::vector<std::string> const& a) 
+void (*_Item$initCreativeItems)();
+void Item$initCreativeItems() 
 {
-	if(key == "tile.grinder.name") return "Grinder";
-	if(key == "tile.barrel.name") return "Barrel";
-	return _I18n$get(key, a);
+	_Item$initCreativeItems();
+
+	Mechanics::initCreativeItems();
 }
 
-
-JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) 
+void (*_Recipies$initRecipies)();
+void Recipies$initRecipies()
 {
+	_Recipies$initRecipies();
+
+	Mechanics::initRecipies();
+}
+
+//Item::addBlockItems - Crash I don't know why...
+
+
+#if defined(ABI_X86)
+
+extern "C" 
+{
+	void mod_init() 
+	{
+		mcpelauncher_hook((void*) &Item::initItems, (void*) &Item$initItems, (void**) &_Item$initItems);
+		mcpelauncher_hook((void*) &Block::initBlocks, (void*) &Block$initBlocks, (void**) &_Block$initBlocks);
+		//mcpelauncher_hook((void*) &Item::addBlockItems, (void*) &Item$addBlockItems, (void**) &_Item$addBlockItems);
+		mcpelauncher_hook((void*) &Item::initCreativeItems, (void*) &Item$initCreativeItems, (void**) &_Item$initCreativeItems);
+		//mcpelauncher_hook((void*) &Recipies::initRecipies, (void*) &Recipies$initRecipies, (void**) &_Recipies$initRecipies);
+	}
+}
+
+#elif defined(ABI_ARM)
+
+JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	
-	MSHookFunction((void*) &I18n::get, (void*) &I18n$get, (void**) &_I18n$get);
-	MSHookFunction((void*) &Tile::initTiles, (void*) &Tile$initTiles, (void**) &_Tile$initTiles); 
-	MSHookFunction((void*) &TileEntity::initTileEntities, (void*) &TileEntity$initTileEntities, (void**) &_TileEntity$initTileEntities);
-	MSHookFunction((void*) &TileEntityFactory::createTileEntity, (void*) &TileEntityFactory$createTileEntity, (void**) &_TileEntityFactory$createTileEntity);
+	MSHookFunction((void*) &Item::initItems, (void*) &Item$initItems, (void**) &_Item$initItems);
+	MSHookFunction((void*) &Block::initBlocks, (void*) &Block$initBlocks, (void**) &_Block$initBlocks);
+	//MSHookFunction((void*) &Item::addBlockItems, (void*) &Item$addBlockItems, (void**) &_Item$addBlockItems);
+	MSHookFunction((void*) &Item::initCreativeItems, (void*) &Item$initCreativeItems, (void**) &_Item$initCreativeItems);
+	//MSHookFunction((void*) &Recipies::initRecipies, (void*) &Recipies$initRecipies, (void**) &_Recipies$initRecipies);
+
 	return JNI_VERSION_1_2;
 }
+
+#endif
