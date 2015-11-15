@@ -24,8 +24,6 @@ void Mechanics::initBlocks()
 	//Block::mBlocks[201] = mElectricFurnace = nullptr;
 	//Block::mBlocks[201] = mGrinder =  nullptr;
 	//Block::mBlocks[201] = mPowerCell = nullptr;
-
-	Mechanics::addBlockItems();
 }
 
 void Mechanics::initItems()

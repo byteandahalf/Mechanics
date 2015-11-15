@@ -33,14 +33,6 @@ void Block$initBlocks()
 	_Block$initBlocks();
 
 	Mechanics::initBlocks();
-}
-
-//This thing crash I don't know why!!
-void (*_Item$addBlockItems)();
-void Item$addBlockItems()
-{
-	_Item$addBlockItems();
-
 	Mechanics::addBlockItems();
 }
 
@@ -60,9 +52,6 @@ void Recipies$initRecipies()
 	Mechanics::initRecipies();
 }
 
-//Item::addBlockItems - Crash I don't know why...
-
-
 #if defined(ABI_X86)
 
 extern "C" 
@@ -71,7 +60,6 @@ extern "C"
 	{
 		mcpelauncher_hook((void*) &Item::initItems, (void*) &Item$initItems, (void**) &_Item$initItems);
 		mcpelauncher_hook((void*) &Block::initBlocks, (void*) &Block$initBlocks, (void**) &_Block$initBlocks);
-		//mcpelauncher_hook((void*) &Item::addBlockItems, (void*) &Item$addBlockItems, (void**) &_Item$addBlockItems);
 		mcpelauncher_hook((void*) &Item::initCreativeItems, (void*) &Item$initCreativeItems, (void**) &_Item$initCreativeItems);
 		//mcpelauncher_hook((void*) &Recipies::initRecipies, (void*) &Recipies$initRecipies, (void**) &_Recipies$initRecipies);
 	}
@@ -83,7 +71,6 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	
 	MSHookFunction((void*) &Item::initItems, (void*) &Item$initItems, (void**) &_Item$initItems);
 	MSHookFunction((void*) &Block::initBlocks, (void*) &Block$initBlocks, (void**) &_Block$initBlocks);
-	//MSHookFunction((void*) &Item::addBlockItems, (void*) &Item$addBlockItems, (void**) &_Item$addBlockItems);
 	MSHookFunction((void*) &Item::initCreativeItems, (void*) &Item$initCreativeItems, (void**) &_Item$initCreativeItems);
 	//MSHookFunction((void*) &Recipies::initRecipies, (void*) &Recipies$initRecipies, (void**) &_Recipies$initRecipies);
 

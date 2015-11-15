@@ -1,8 +1,8 @@
 #include "Barrel.h"
 
-Barrel::Barrel(int blockId) : EntityBlock("barrel", blockId, "stone", Material::mMaterials[3]) {
-
+Barrel::Barrel(int blockId) : EntityBlock("barrel", blockId, "stone", Material::mMaterials[3]) 
+{
 	setDestroyTime(1.0F);
 	setExplodeable(15.0F);
-	creativeCategory = 1;
+	this->creativeCategory = 1;
 }
