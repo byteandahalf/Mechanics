@@ -41,5 +41,8 @@ public:
 	//This method will register all item and block recipes
 	static void initRecipies();
 
+	//Register all the BlockEntities
+	static void initBlockEntities();
+
 
 };

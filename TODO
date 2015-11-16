@@ -7,10 +7,11 @@ TODO(1.0.0):
 	Implement Power Cell
 	Implement Conductive Cable
 	Implement Crusher
-	Implement ElectricFurnace
+	Implement Electric Furnace
 
 TODO(2.0.0):
 	Implement configurable blocks and items ids
+	Implement Drill and Quarry
 	Implement tranport pipe
 
 

@@ -11,12 +11,13 @@
 	#include <substrate.h>
 #endif
 
-#include "Mechanics.h"
 #include "MCPE/client/MinecraftClient.h"
-#include "MCPE/world/level/block/Block.h"
 #include "MCPE/world/item/Item.h"
-#include "MCPE/world/level/biome/BiomeDecorator.h"
+#include "MCPE/world/level/block/Block.h"
+#include "MCPE/world/level/block/entity/BlockEntity.h"
 
+#include "Mechanics.h"
+#include "Mechanics/blocks/entity/BarrelEntity.h"
 
 
 void (*_Item$initItems)();
@@ -52,6 +53,22 @@ void Recipies$initRecipies()
 	Mechanics::initRecipies();
 }
 
+static void (*_BlockEntity$initBlockEntities)();
+static void BlockEntity$initBlockEntities()
+{
+	_BlockEntity$initBlockEntities();
+
+	Mechanics::initBlockEntities();
+}
+
+static std::unique_ptr<BlockEntity> (*_BlockEntityFactory$createBlockEntity)(BlockEntityType, BlockPos const&);
+static std::unique_ptr<BlockEntity>  BlockEntityFactory$createBlockEntity(BlockEntityType type, BlockPos const& pos)
+{
+	if(type == BlockEntityType::Barrel) return std::unique_ptr<BlockEntity>(new BarrelEntity(pos));
+	return _BlockEntityFactory$createBlockEntity(type, pos);
+}
+
+
 #if defined(ABI_X86)
 
 extern "C" 
@@ -62,6 +79,9 @@ extern "C"
 		mcpelauncher_hook((void*) &Block::initBlocks, (void*) &Block$initBlocks, (void**) &_Block$initBlocks);
 		mcpelauncher_hook((void*) &Item::initCreativeItems, (void*) &Item$initCreativeItems, (void**) &_Item$initCreativeItems);
 		//mcpelauncher_hook((void*) &Recipies::initRecipies, (void*) &Recipies$initRecipies, (void**) &_Recipies$initRecipies);
+		
+		//mcpelauncher_hook((void*) &BlockEntity::initBlockEntities, (void*) &BlockEntity$initBlockEntities, (void**) &_BlockEntity$initBlockEntities);
+		//mcpelauncher_hook((void*) &BlockEntityFactory::createBlockEntity, (void*) &BlockEntityFactory$createBlockEntity, (void**) &_BlockEntityFactory$createBlockEntity);
 	}
 }
 
@@ -73,6 +93,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	MSHookFunction((void*) &Block::initBlocks, (void*) &Block$initBlocks, (void**) &_Block$initBlocks);
 	MSHookFunction((void*) &Item::initCreativeItems, (void*) &Item$initCreativeItems, (void**) &_Item$initCreativeItems);
 	//MSHookFunction((void*) &Recipies::initRecipies, (void*) &Recipies$initRecipies, (void**) &_Recipies$initRecipies);
+
 
 	return JNI_VERSION_1_2;
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-enum BlockEntityType : int {
+enum class BlockEntityType : int {
 	BLOCKENTITY_NONE,
 	Furnace,
 	Chest,
@@ -12,5 +12,9 @@ enum BlockEntityType : int {
 	BrewingStand,
 	EnchantTable,
 	DaylightDetector,
-	NoteBlock
+	NoteBlock,
+
+	Barrel = 20
 };
+
+enum BlockEntityRendererId  {};

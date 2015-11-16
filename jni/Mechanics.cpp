@@ -49,3 +49,8 @@ void Mechanics::initRecipies()
 {
 	//TODO: Add recipe for the block and item
 }
+
+void Mechanics::initBlockEntities()
+{
+	BlockEntity::setId(BlockEntityType::Barrel, "Barrel");
+}
