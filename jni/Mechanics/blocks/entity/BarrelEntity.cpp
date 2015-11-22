@@ -31,7 +31,7 @@ void BarrelEntity::load(CompoundTag& compoundTag)
 
 bool BarrelEntity::save(CompoundTag& compoundTag)
 {
-	//TileEntity::save(compoundTag);
+	BlockEntity::save(compoundTag);
 
 	//compoundTag->putInt("MaxItems", this->maxItems);
 	//compoundTag->putInt("ItemCount", this->itemCount);
@@ -40,7 +40,7 @@ bool BarrelEntity::save(CompoundTag& compoundTag)
 	//if(this->itemInstance != nullptr)
 	//	compoundTag->putCompound("Item", std::unique_ptr<CompoundTag>(this->itemInstance->save()));
 
-	return false;
+	return true;
 }
 
 
