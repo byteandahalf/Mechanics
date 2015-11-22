@@ -1,10 +1,11 @@
 #include "Barrel.h"
 
-Barrel::Barrel(int blockId) : EntityBlock("barrel", blockId, "stone", Material::mMaterials[3]) 
+#include "MCPE/world/material/Material.h"
+
+Barrel::Barrel(int blockId) : Block("barrel", blockId, "log", Material::getMaterial(MaterialType::WOOD)) 
 {
-	setDestroyTime(1.0F);
-	setExplodeable(15.0F);
+	setDestroyTime(0.5);
+	setExplodeable(3.0F);
 	
 	this->creativeCategory = 1;
-	this->blockEntityType = BlockEntityType::Barrel;
 }

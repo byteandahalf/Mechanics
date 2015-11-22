@@ -52,5 +52,5 @@ void Mechanics::initRecipies()
 
 void Mechanics::initBlockEntities()
 {
-	BlockEntity::setId(BlockEntityType::Barrel, "Barrel");
+	//BlockEntity::setId(BlockEntityType::Barrel, "Barrel");
 }

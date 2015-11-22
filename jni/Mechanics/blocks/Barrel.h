@@ -1,8 +1,8 @@
 #pragma once
 
-#include "MCPE/world/level/block/EntityBlock.h"
+#include "MCPE/world/level/block/Block.h"
 
-class Barrel : public EntityBlock
+class Barrel : public Block
 {
 public:
 	Barrel(int blockId);

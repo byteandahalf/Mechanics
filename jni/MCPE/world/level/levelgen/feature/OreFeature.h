@@ -1,6 +1,6 @@
 #pragma once
 #include "Feature.h"
-#include "MCPE/CommonTypes.h"
+#include "../../../../CommonTypes.h"
 
 class OreFeature : public Feature {
 	BlockID id;
