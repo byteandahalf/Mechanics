@@ -5,10 +5,11 @@
 #if defined(ABI_X86)
 	#include "mcpelauncher_api.h"
 #elif defined(ABI_ARM)
-	#include <android/log.h>
 	#include <jni.h>
 	#include <substrate.h>
 #endif
+
+#include "Common.h"
 
 #include "MCPE/client/MinecraftClient.h"
 #include "MCPE/locale/I18n.h"
@@ -17,7 +18,6 @@
 
 #include "Mechanics.h"
 #include "Mechanics/blocks/entity/BarrelEntity.h"
-
 
 void (*_Item$initItems)();
 void Item$initItems()
@@ -84,14 +84,14 @@ extern "C"
 	void mod_init() 
 	{
 		mcpelauncher_hook((void*) &Block::initBlocks, (void*) &Block$initBlocks, (void**) &_Block$initBlocks);
-		mcpelauncher_hook((void*) &BlockEntity::initBlockEntities, (void*) &BlockEntity$initBlockEntities, (void**) &_BlockEntity$initBlockEntities);
+		//mcpelauncher_hook((void*) &BlockEntity::initBlockEntities, (void*) &BlockEntity$initBlockEntities, (void**) &_BlockEntity$initBlockEntities);
 		mcpelauncher_hook((void*) &Item::initItems, (void*) &Item$initItems, (void**) &_Item$initItems);
 		mcpelauncher_hook((void*) &Item::initCreativeItems, (void*) &Item$initCreativeItems, (void**) &_Item$initCreativeItems);
 		//mcpelauncher_hook((void*) &Recipies::initRecipies, (void*) &Recipies$initRecipies, (void**) &_Recipies$initRecipies);
 		
-		mcpelauncher_hook((void*) &I18n::get, (void*) &I18n$get, (void**) &_I18n$get);
+		//mcpelauncher_hook((void*) &I18n::get, (void*) &I18n$get, (void**) &_I18n$get);
 
-		mcpelauncher_hook((void*) &BlockEntityFactory::createBlockEntity, (void*) &BlockEntityFactory$createBlockEntity, (void**) &_BlockEntityFactory$createBlockEntity);
+		//mcpelauncher_hook((void*) &BlockEntityFactory::createBlockEntity, (void*) &BlockEntityFactory$createBlockEntity, (void**) &_BlockEntityFactory$createBlockEntity);
 	}
 }
 

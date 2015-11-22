@@ -53,6 +53,7 @@ void BarrelEntity::clear()
 		if(this->itemInstance != nullptr)
 			delete this->itemInstance;
 
+		this->itemInstance = nullptr;
 		this->itemCount = 0;
 		this->maxItems = 0;
 	}

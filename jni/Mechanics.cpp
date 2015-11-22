@@ -3,7 +3,7 @@
 #include "MCPE/world/item/BlockItem.h"
 
 #include "Mechanics/blocks/entity/BarrelEntity.h"
-#include "Mechanics/blocks/Barrel.h"
+#include "Mechanics/blocks/BarrelBlock.h"
 
 Block* Mechanics::mBarrel; 
 Block* Mechanics::mConductiveCable;
@@ -20,7 +20,7 @@ Item* Mechanics::mWrench;
 void Mechanics::initBlocks()
 {
 	//Init block
-	Block::mBlocks[201] = mBarrel = (new Barrel(201))->init(); 
+	Block::mBlocks[201] = mBarrel = (new BarrelBlock(201))->init(); 
 	//Block::mBlocks[201] = mConductiveCable = nullptr;
 	//Block::mBlocks[201] = mCrusher = nullptr;
 	//Block::mBlocks[201] = mElectricFurnace = nullptr;

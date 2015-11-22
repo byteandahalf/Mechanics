@@ -13,8 +13,8 @@ public:
 
 	ItemInstance* itemInstance;
 
-	unsigned int itemCount;
-	unsigned int maxItems;
+	int itemCount;
+	int maxItems;
 
 	BarrelEntity(const BlockPos&);
 	virtual ~BarrelEntity();
