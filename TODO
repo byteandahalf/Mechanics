@@ -7,13 +7,13 @@ TODO(1.0.0):
 
 TODO(2.0.0):
 	Implement configurable blocks and items ids
-	Imeplement Energy API
+	Implement Energy API
 	Implement Generators(Lava, Coal, Charcoal, etc)
 	Implement Power Cell
 	Implement Conductive Cable
 	Implement Crusher
 	Implement Electric Furnace
 	Implement Drill and Quarry
-	Implement tranport pipe
+	Implement Transport pipe
 
 

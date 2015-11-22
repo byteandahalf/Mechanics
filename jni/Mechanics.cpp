@@ -1,6 +1,8 @@
 #include "Mechanics.h"
 
 #include "MCPE/world/item/BlockItem.h"
+
+#include "Mechanics/blocks/entity/BarrelEntity.h"
 #include "Mechanics/blocks/Barrel.h"
 
 Block* Mechanics::mBarrel; 
@@ -52,5 +54,5 @@ void Mechanics::initRecipies()
 
 void Mechanics::initBlockEntities()
 {
-	//BlockEntity::setId(BlockEntityType::Barrel, "Barrel");
+	BlockEntity::setId(BlockEntityType::Barrel, BARREL_STRING_ID);
 }
