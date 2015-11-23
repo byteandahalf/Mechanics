@@ -93,7 +93,7 @@ public:
 	void remove(int);
 	void resetHoverName();
 	bool sameItemAndAux(ItemInstance const*) const;
-	void save();
+	CompoundTag* save();
 	void saveEnchantsToUserData(ItemEnchants const&);
 	void set(int);
 	void setAuxValue(short);
@@ -111,6 +111,6 @@ public:
 
 	static ItemInstance* clone(ItemInstance const*);
 	static ItemInstance* cloneSafe(ItemInstance const*);
-	static ItemInstance fromTag(CompoundTag const&);
+	static ItemInstance* fromTag(CompoundTag const&);
 		
 };

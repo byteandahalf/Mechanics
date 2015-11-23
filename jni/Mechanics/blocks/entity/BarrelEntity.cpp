@@ -1,5 +1,7 @@
 #include "BarrelEntity.h"
 
+#include "MCPE/nbt/CompoundTag.h"
+
 BarrelEntity::BarrelEntity(const BlockPos& pos) : BlockEntity(BlockEntityType::Barrel, pos, BARREL_STRING_ID)
 {
 	//this->rendererId = 0;
@@ -18,27 +20,29 @@ BarrelEntity::~BarrelEntity()
 
 void BarrelEntity::load(CompoundTag& compoundTag)
 {
+	if(compoundTag.contains("ItemID"))
+		this->itemInstance = new ItemInstance(compoundTag.getInt("ItemID"), 1, compoundTag.getInt("ItemAux"));
 
-	//return;
+	this->itemCount = compoundTag.getInt("ItemCount");
 	
-	//if(compoundTag->tags["Item"] != nullptr)
-	//	this->itemInstance = ItemInstance::fromTag(*((CompoundTag*)compoundTag->tags["Item"]));
-	//
-	//this->itemCount = ((IntTag*)compoundTag->tags["ItemCount"])->data;
-	//this->isLocked = ((ByteTag*)compoundTag->tags["Locked"])->data == 0x01 ? true : false;
-	//this->maxItems = ((IntTag*)compoundTag->tags["MaxItems"])->data;
+	this->maxItems = compoundTag.getInt("MaxItems");
+	this->isLocked = compoundTag.getBoolean("Locked");
 }
 
 bool BarrelEntity::save(CompoundTag& compoundTag)
 {
 	BlockEntity::save(compoundTag);
-
-	//compoundTag->putInt("MaxItems", this->maxItems);
-	//compoundTag->putInt("ItemCount", this->itemCount);
-	//compoundTag->putByte("Locked", this->isLocked ? 0x01 : 0x00);
 	
-	//if(this->itemInstance != nullptr)
-	//	compoundTag->putCompound("Item", std::unique_ptr<CompoundTag>(this->itemInstance->save()));
+	if(this->itemInstance != nullptr) 
+	{
+		compoundTag.putInt("ItemID", this->itemInstance->getId());
+		compoundTag.putInt("ItemAux", this->itemInstance->getAuxValue());
+	}
+
+	compoundTag.putInt("ItemCount", this->itemCount);
+
+	compoundTag.putInt("MaxItems", this->maxItems);
+	compoundTag.putBoolean("Locked", this->isLocked);
 
 	return true;
 }
