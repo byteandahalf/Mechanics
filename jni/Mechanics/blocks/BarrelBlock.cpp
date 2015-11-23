@@ -1,8 +1,10 @@
 #include "BarrelBlock.h"
 #include "entity/BarrelEntity.h"
 
+#include "MCPE/world/entity/ItemEntity.h"
 #include "MCPE/world/entity/player/Player.h"
 #include "MCPE/world/entity/player/Inventory.h"
+#include "MCPE/world/level/Level.h"
 #include "MCPE/world/material/Material.h"
 #include "Common.h"
 
@@ -25,8 +27,10 @@ void BarrelBlock::onRemove(BlockSource& blockSource, const BlockPos&  pos)
 	while(container->itemCount > 0 && container->itemInstance->getId() != 0)
 	{
 		int stackSize = ((container->itemCount > container->itemInstance->getMaxStackSize()) ? container->itemInstance->getMaxStackSize() : container->itemCount);
-		ItemInstance* newStack = new ItemInstance(container->itemInstance->getId(), stackSize, container->itemInstance->getAuxValue());
-		//TODO: Drop item to the floor
+		ItemInstance newStack(container->itemInstance->getId(), stackSize, container->itemInstance->getAuxValue());
+		
+		blockSource.getLevel()->addEntity(std::unique_ptr<Entity>(new ItemEntity(blockSource, Vec3(pos), newStack, 1)));
+		
 		container->itemCount -= container->itemInstance->getMaxStackSize();
 	}
 	container->setChanged();
@@ -60,7 +64,7 @@ bool BarrelBlock::use(Player& player, const BlockPos& pos)
 		if(!playerInventory->add(temp)) // This function clone the ItemInstance
 		{
 			//If the player does not have space, drop the item to the floor.
-			//TODO: Drop the item
+			player.region.getLevel()->addEntity(std::unique_ptr<Entity>(new ItemEntity(player.region, Vec3(pos), temp, 1)));
 		} 
 		container->itemCount -= 1;
 	} 
@@ -105,7 +109,7 @@ void BarrelBlock::attack(Player* player, const BlockPos& pos)
 	ItemInstance newItem(container->itemInstance->getId(), stackSize, container->itemInstance->getAuxValue());
 	if(!playerInventory->add(newItem))
 	{
-		//TODO: Drop the item to the floor
+		player->region.getLevel()->addEntity(std::unique_ptr<Entity>(new ItemEntity(player->region, Vec3(pos), newItem, 1)));
 	}
 	container->itemCount -= stackSize;
 

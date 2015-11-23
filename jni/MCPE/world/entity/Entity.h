@@ -154,8 +154,8 @@ public:
 	virtual void markHurt();
 	virtual void burn(int);
 	virtual void lavaHurt();
-	virtual void readAdditionalSaveData(const CompoundTag*) = 0;
-	virtual void addAdditionalSaveData(CompoundTag*) = 0;
+	virtual void readAdditionalSaveData(const CompoundTag&) = 0;
+	virtual void addAdditionalSaveData(CompoundTag&) = 0;
 	virtual void _playStepSound(const BlockPos&, int);
 	virtual void checkInsideBlocks(float);
 	virtual void pushOutOfBlocks(const Vec3&);
