@@ -76,14 +76,11 @@ void GrinderEntity::load(CompoundTag& tag)
 
 bool GrinderEntity::save(CompoundTag& tag)
 {
-	LOGI("GrinderEntity Saved!");
 	//Save BlockEntity ID and Position
 	BlockEntity::save(tag);
 
 	if(this->inputItem != nullptr)
 	{
-		LOGI("Input Item Saved!");
-
 		//Save input item
 		tag.putInt("InputItemID", this->inputItem->getId());
 		tag.putInt("InputItemAUX", this->inputItem->getAuxValue());
