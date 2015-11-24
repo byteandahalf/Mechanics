@@ -2,5 +2,8 @@
 
 IronDustItem::IronDustItem(short itemId) : Item("ironDust", itemId)
 {
-	setIcon("apple", 0);
+	this->creativeCategory = 1;
+	
+	this->setIcon("ironDust", 0);
+	this->setMaxStackSize(64);
 }

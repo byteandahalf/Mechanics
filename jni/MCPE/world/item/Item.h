@@ -35,6 +35,7 @@ public:
 	int idk5; // 52
 	bool isFood; // 56
 	Item* craftingRemainingItem; // 60
+	//char* filler[24];
 
 	static Item* mItems[512];
 

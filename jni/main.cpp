@@ -88,6 +88,7 @@ std::string I18n$get(std::string const& key, std::vector<std::string> const& a)
 	if(key == "tile.barrel.name") return "Barrel";
 	if(key == "tile.wooden_crank.name") return "Wooden Crank";
 	if(key == "item.ironDust.name") return "Iron Dust";
+	if(key == "item.goldDust.name") return "Gold Dust";
 	return _I18n$get(key, a);
 }
 
