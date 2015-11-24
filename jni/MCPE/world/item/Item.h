@@ -88,7 +88,7 @@ public:
 	virtual int getIconYOffset() const;
 	virtual bool isMirroredArt() const;
 
-	void init(Json::Value&);
+	Item* init(Json::Value&);
 
 	static TextureUVCoordinateSet getTextureUVCoordinateSet(const std::string&, int);
 	static void initItems();

@@ -27,12 +27,15 @@ bool GrinderBlock::use(Player& player, const BlockPos& pos)
 	ItemInstance* itemInstance = player.getSelectedItem();
 	if(itemInstance != nullptr && grinderEntity->inputItem == nullptr)
 	{
-		grinderEntity->inputItem = ItemInstance::clone(itemInstance);
-		grinderEntity->setChanged();
+		if(mechanics->getRecipeManager()->getOutputItemFromGrinderRecipe(itemInstance, 0) != nullptr)
+		{
+			grinderEntity->inputItem = ItemInstance::clone(itemInstance);
+			grinderEntity->setChanged();
 
-		Inventory* playerInventory = *(Inventory**) (((uintptr_t) &player) + 0xD78);
-		playerInventory->clearSlot(playerInventory->getSelectedSlot());
-		return true;
+			Inventory* playerInventory = *(Inventory**) (((uintptr_t) &player) + 0xD78);
+			playerInventory->clearSlot(playerInventory->getSelectedSlot());
+			return true;
+		}
 	}
 	return false;
 }

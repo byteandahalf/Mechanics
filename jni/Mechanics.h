@@ -53,6 +53,6 @@ public:
 	//Items           ///
 	/////////////////////
 	static Item* mCable;
-	static Item* mOreDust;
+	static Item* mIronDust;
 	static Item* mWrench;
 };
