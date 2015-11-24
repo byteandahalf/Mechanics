@@ -28,6 +28,7 @@ bool GrinderBlock::use(Player& player, const BlockPos& pos)
 	if(itemInstance != nullptr && grinderEntity->inputItem == nullptr)
 	{
 		grinderEntity->inputItem = ItemInstance::clone(itemInstance);
+		grinderEntity->setChanged();
 
 		Inventory* playerInventory = *(Inventory**) (((uintptr_t) &player) + 0xD78);
 		playerInventory->clearSlot(playerInventory->getSelectedSlot());

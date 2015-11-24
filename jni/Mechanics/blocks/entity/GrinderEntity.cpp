@@ -13,15 +13,16 @@ GrinderEntity::GrinderEntity(const BlockPos& pos) : BlockEntity(BlockEntityType:
 
 GrinderEntity::~GrinderEntity()
 {
-	if(this->inputItem == nullptr)
+	if(this->inputItem != nullptr)
 		delete this->inputItem;
 
-	if(this->outputItem == nullptr)
+	if(this->outputItem != nullptr)
 		delete this->outputItem;
 }
 
 void GrinderEntity::tick(BlockSource& blockSource)
 {
+	BlockEntity::tick(blockSource);
 
 	if(this->inputItem != nullptr && this->tickCount >= 0)
 	{
@@ -29,35 +30,36 @@ void GrinderEntity::tick(BlockSource& blockSource)
 		if(recipeStack == nullptr)
 			return;
 
-		LOGI("#1.1");
 		if(this->outputItem != nullptr && this->outputItem->sameItemAndAux(recipeStack))
 		{
-			LOGI("#1.1.1");
 			this->outputItem->count += recipeStack->count;
 			if(--this->inputItem->count == 0)
+			{
 				delete this->inputItem;
+				this->inputItem = nullptr;
+			}
 
 			this->tickCount = 0;
 			delete recipeStack;
 		}
 		else if(this->outputItem == nullptr)
 		{
-			LOGI("#1.1.2");
-			//this->outputItem = recipeStack;
-
-			BlockPos pos = this->getPosition();
-			pos.y--;
-
-			blockSource.getLevel()->addEntity(std::unique_ptr<Entity>(new ItemEntity(blockSource, Vec3(pos), recipeStack, 32)));
+			this->outputItem = recipeStack;
+			//blockSource.getLevel()->addEntity(std::unique_ptr<Entity>(new ItemEntity(blockSource, Vec3(this->getPosition()), *recipeStack, 1)));
 
 			if(--this->inputItem->count == 0)
+			{
 				delete this->inputItem;
-
+				this->inputItem = nullptr;
+			}
+			
 			this->tickCount = 0;
 		}
 		else
 			delete recipeStack;
 	}
+
+	this->setChanged();
 }
 
 void GrinderEntity::load(CompoundTag& tag)
@@ -66,7 +68,7 @@ void GrinderEntity::load(CompoundTag& tag)
 		this->inputItem = new ItemInstance(tag.getInt("InputItemID"), tag.getInt("InputItemCount"), tag.getInt("InputItemAUX"));
 
 	if(tag.contains("OutputItemID")) //Load output item
-		this->inputItem = new ItemInstance(tag.getInt("OutputItemID"), tag.getInt("OutputItemCount"), tag.getInt("OutputItemAUX"));
+		this->outputItem = new ItemInstance(tag.getInt("OutputItemID"), tag.getInt("OutputItemCount"), tag.getInt("OutputItemAUX"));
 
 	//Load tick count
 	this->tickCount = tag.getInt("TickCount");
@@ -74,11 +76,14 @@ void GrinderEntity::load(CompoundTag& tag)
 
 bool GrinderEntity::save(CompoundTag& tag)
 {
+	LOGI("GrinderEntity Saved!");
 	//Save BlockEntity ID and Position
 	BlockEntity::save(tag);
 
 	if(this->inputItem != nullptr)
 	{
+		LOGI("Input Item Saved!");
+
 		//Save input item
 		tag.putInt("InputItemID", this->inputItem->getId());
 		tag.putInt("InputItemAUX", this->inputItem->getAuxValue());

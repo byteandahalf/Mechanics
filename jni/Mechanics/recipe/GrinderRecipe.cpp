@@ -18,7 +18,7 @@ GrinderRecipe::~GrinderRecipe()
 
 bool GrinderRecipe::haveRequisite(ItemInstance* inputItem, int neededTicks)
 {
-	return ((this->_inputItem->sameItemAndAux(inputItem) && this->_neededTicks >= neededTicks) ? true : false);
+	return ((this->_inputItem->sameItemAndAux(inputItem) && this->_neededTicks == neededTicks) ? true : false);
 }
 
 ItemInstance* GrinderRecipe::getOutputItem() const

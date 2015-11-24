@@ -42,6 +42,3 @@ proguard/
 
 
 *.sh
-
-# Minecraft PE Headers
-jni/MCPE/
