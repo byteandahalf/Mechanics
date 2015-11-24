@@ -6,6 +6,8 @@ class ListTag;
 class FillingContainer : public Container
 {
 public:
+	FillingContainer(Player*, int, int, ContainerType);
+
 	virtual ~FillingContainer();
 
 	virtual ItemInstance* getItem(int) const;

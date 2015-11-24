@@ -49,9 +49,9 @@ public:
 	AABB getAABB() const;
 	int getData() const;
 	BlockPos& getPosition() const;
-	int getRendererId() const;
+	BlockEntityRendererId getRendererId() const;
 	int getRunningId() const;
-	int getType() const;
+	BlockEntityType getType() const;
 	bool isClientSideOnly() const;
 	bool isInWorld() const;
 	void setBB(AABB);

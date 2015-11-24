@@ -5,7 +5,7 @@
 class ItemEntity : public Entity
 {
 public:
-	char filler[44];
+	char filler[100];//44
 
 	ItemEntity(BlockSource&);
 	ItemEntity(BlockSource&, Vec3 const&, ItemInstance const&, int);

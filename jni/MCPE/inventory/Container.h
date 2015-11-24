@@ -6,6 +6,9 @@
 #include "MCPE/world/item/ItemInstance.h"
 
 class Player;
+
+enum ContainerType {};
+
 class Container
 {
 public:
