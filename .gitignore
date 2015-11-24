@@ -40,4 +40,8 @@ proguard/
 *.project
 .settings/
 
+
 *.sh
+
+# Minecraft PE Headers
+jni/MCPE/
