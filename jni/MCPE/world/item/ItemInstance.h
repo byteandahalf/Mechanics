@@ -13,8 +13,8 @@ class Level;
 
 class ItemInstance {
 public:
-	short count;
-	short aux;
+	unsigned char count;
+	unsigned short aux;
 	CompoundTag* userData;
 	bool valid;
 	Item* item;

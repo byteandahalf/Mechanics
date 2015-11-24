@@ -1,22 +1,21 @@
 #include "BarrelBlock.h"
 #include "entity/BarrelEntity.h"
 
+#include "Common.h"
 #include "MCPE/world/entity/ItemEntity.h"
 #include "MCPE/world/entity/player/Player.h"
 #include "MCPE/world/entity/player/Inventory.h"
 #include "MCPE/world/level/Level.h"
 #include "MCPE/world/material/Material.h"
-#include "Common.h"
 
 BarrelBlock::BarrelBlock(int blockId) : EntityBlock("barrel", blockId, "log", Material::getMaterial(MaterialType::WOOD)) 
 {
-	setDestroyTime(0.5);
-	setExplodeable(3.0F);
+	this->setDestroyTime(0.5);
+	this->setExplodeable(3.0F);
 	
 	this->creativeCategory = 1;
 	this->blockEntityType = BlockEntityType::Barrel;
 }
-
 
 void BarrelBlock::onRemove(BlockSource& blockSource, const BlockPos&  pos)
 {
@@ -46,12 +45,6 @@ bool BarrelBlock::use(Player& player, const BlockPos& pos)
 	ItemInstance* instance = player.getSelectedItem();
 	if(container->itemInstance == nullptr && instance != nullptr) 
 	{
-		LOGI("ItemInstance: %d %d %d", instance->getId(), instance->getAuxValue(), instance->count);
-
-		//This is a workaround the ItemInstance "bug" of showing wrong count
-		if(instance->count > instance->getMaxStackSize() || instance->count < 0) 
-			return true;
-
 	 	container->maxItems =  instance->getMaxStackSize() * 64;
 		container->itemCount = instance->count;
 		container->itemInstance = ItemInstance::clone(instance);
@@ -70,9 +63,6 @@ bool BarrelBlock::use(Player& player, const BlockPos& pos)
 	} 
 	else if(container->itemInstance->sameItemAndAux(instance) && (container->itemCount > 0) && (container->itemCount < container->maxItems))
 	{
-		//This is a workaround the ItemInstance "bug" of showing wrong count
-		if(instance->count > instance->getMaxStackSize() || instance->count < 0) 
-			return true;
 
 		if((container->itemCount + instance->count) > container->maxItems) 
 		{
@@ -90,7 +80,7 @@ bool BarrelBlock::use(Player& player, const BlockPos& pos)
 	if(container->itemCount <= 0)
 		container->clear();
 
-	if(instance == NULL)
+	if(instance == nullptr)
 		return false;
 
 	return true;
