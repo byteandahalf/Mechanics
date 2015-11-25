@@ -55,5 +55,6 @@ public:
 	static Item* mCable;
 	static Item* mGoldDust;
 	static Item* mIronDust;
+	static Item* mWoodenGear;
 	static Item* mWrench;
 };

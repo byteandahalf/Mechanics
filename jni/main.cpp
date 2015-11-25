@@ -12,6 +12,7 @@
 #include "Common.h"
 
 #include "MCPE/client/MinecraftClient.h"
+#include "MCPE/client/screens/SurvivalInventoryScreen.h"
 #include "MCPE/locale/I18n.h"
 #include "MCPE/world/item/Item.h"
 #include "MCPE/world/level/block/Block.h"
@@ -28,8 +29,6 @@ void MinecraftClient$init(MinecraftClient* minecraftClient)
 	mechanics = new Mechanics();
 
 	_MinecraftClient$init(minecraftClient);
-
-	mechanics->initRecipies();
 }
 
 void (*_Item$initItems)();
@@ -73,6 +72,19 @@ void BlockEntity$initBlockEntities()
 	mechanics->initBlockEntities();
 }
 
+void (*_SurvivalInventoryScreen$_updateCraftableItems)(SurvivalInventoryScreen*);
+void SurvivalInventoryScreen$_updateCraftableItems(SurvivalInventoryScreen* screen)
+{
+	_SurvivalInventoryScreen$_updateCraftableItems(screen);
+
+	static bool registered = false;
+	if(registered)
+		return;
+
+	mechanics->initRecipies();
+	registered = true;
+}
+
 std::unique_ptr<BlockEntity> (*_BlockEntityFactory$createBlockEntity)(BlockEntityType, const BlockPos&);
 std::unique_ptr<BlockEntity> BlockEntityFactory$createBlockEntity(BlockEntityType type, const BlockPos&  pos)
 {
@@ -89,6 +101,7 @@ std::string I18n$get(std::string const& key, std::vector<std::string> const& a)
 	if(key == "tile.wooden_crank.name") return "Wooden Crank";
 	if(key == "item.ironDust.name") return "Iron Dust";
 	if(key == "item.goldDust.name") return "Gold Dust";
+	if(key == "item.woodenGear.name") return "Wooden Gear";
 	return _I18n$get(key, a);
 }
 
@@ -117,6 +130,8 @@ extern "C"
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) 
 {
+
+	MSHookFunction((void*) &SurvivalInventoryScreen::_updateCraftableItems, (void*) &SurvivalInventoryScreen$_updateCraftableItems, (void**)&_SurvivalInventoryScreen$_updateCraftableItems);
 	MSHookFunction((void*) &MinecraftClient::init, (void*) &MinecraftClient$init, (void**) &_MinecraftClient$init);
 	MSHookFunction((void*) &Block::initBlocks, (void*) &Block$initBlocks, (void**) &_Block$initBlocks);
 	MSHookFunction((void*) &BlockEntity::initBlockEntities, (void*) &BlockEntity$initBlockEntities, (void**) &_BlockEntity$initBlockEntities);

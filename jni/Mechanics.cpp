@@ -2,6 +2,7 @@
 
 #include "MCPE/world/item/BlockItem.h"
 #include "MCPE/world/recipes/FurnaceRecipes.h"
+#include "MCPE/world/recipes/Recipes.h"
 #include "Mechanics/blocks/entity/BarrelEntity.h"
 #include "Mechanics/blocks/entity/GrinderEntity.h"
 #include "Mechanics/blocks/BarrelBlock.h"
@@ -9,6 +10,7 @@
 #include "Mechanics/blocks/WoodenCrankBlock.h"
 #include "Mechanics/items/IronDustItem.h"
 #include "Mechanics/items/GoldDustItem.h"
+#include "Mechanics/items/WoodenGearItem.h"
 
 Block* Mechanics::mBarrel; 
 Block* Mechanics::mConductiveCable;
@@ -21,6 +23,7 @@ Block* Mechanics::mWoodenCrank;
 Item* Mechanics::mCable;
 Item* Mechanics::mGoldDust;
 Item* Mechanics::mIronDust;
+Item* Mechanics::mWoodenGear;
 Item* Mechanics::mWrench;
 
 
@@ -47,6 +50,7 @@ void Mechanics::initItems()
 	//Item::mItems[300] = mCable =  nullptr;
 	Item::mItems[460] = mIronDust = new IronDustItem(460);
 	Item::mItems[461] = mGoldDust = new GoldDustItem(461);
+	Item::mItems[462] = mWoodenGear = new WoodenGearItem(462);
 	//Item::mItems[300] = mWrench = nullptr;
 }
 
@@ -66,6 +70,7 @@ void Mechanics::initCreativeItems()
 	Item::addCreativeItem(mWoodenCrank, 0);
 
 	//Items
+	//Item::addCreativeItem(mWoodenGear, 0);
 	//Item::addCreativeItem(mIronDust, 0);
 	//Item::addCreativeItem(mGoldDust, 0);
 }
@@ -87,8 +92,10 @@ void Mechanics::initRecipies()
 	FurnaceRecipes::getInstance()->addFurnaceRecipe(461, ItemInstance(266, 1, 0)); // Gold Dust -> Gold Ingot
 
 	//Crafting Table Recipes
-	//TODO: Add Barrel Recipe
-	//TODO: Add Grinder Recipe
+	//Recipes::getInstance()->addShapedRecipe(ItemInstance(mWoodenGear->itemId, 1, 0), Recipes::Shape(" s ", "s s", " s "), { Recipes::Type(Item::mItems[280], 's')});
+	Recipes::getInstance()->addShapedRecipe(ItemInstance(mBarrel->blockId, 1, 0), Recipes::Shape("wsw", "w w", "www"), { Recipes::Type(Block::mBlocks[17], 'w'), Recipes::Type(Item::mItems[158], 's')});
+	Recipes::getInstance()->addShapedRecipe(ItemInstance(mGrinder->blockId, 1, 0), Recipes::Shape("sgs", "isi", "cic"), { Recipes::Type(Block::mBlocks[1], 's'), Recipes::Type(Item::mItems[462], 'g'), Recipes::Type(Item::mItems[265], 'i'), Recipes::Type(Block::mBlocks[4], 'c')});
+
 }
 
 void Mechanics::initBlockEntities()
