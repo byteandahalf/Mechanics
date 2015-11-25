@@ -5,5 +5,5 @@ WoodenGearItem::WoodenGearItem(short itemId) : Item("woodenGear", itemId)
 	this->creativeCategory = 1;
 
 	this->setIcon("woodenGear", 0);
-	this->setMaxStackSize(16);
+	this->setMaxStackSize(64);
 }

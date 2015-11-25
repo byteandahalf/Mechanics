@@ -90,12 +90,6 @@ void Mechanics::initRecipies()
 	//Furnace Recipes
 	FurnaceRecipes::getInstance()->addFurnaceRecipe(460, ItemInstance(265, 1, 0)); // Iron Dust -> Iron Ingot
 	FurnaceRecipes::getInstance()->addFurnaceRecipe(461, ItemInstance(266, 1, 0)); // Gold Dust -> Gold Ingot
-
-	//Crafting Table Recipes
-	//Recipes::getInstance()->addShapedRecipe(ItemInstance(mWoodenGear->itemId, 1, 0), Recipes::Shape(" s ", "s s", " s "), { Recipes::Type(Item::mItems[280], 's')});
-	Recipes::getInstance()->addShapedRecipe(ItemInstance(mBarrel->blockId, 1, 0), Recipes::Shape("wsw", "w w", "www"), { Recipes::Type(Block::mBlocks[17], 'w'), Recipes::Type(Item::mItems[158], 's')});
-	Recipes::getInstance()->addShapedRecipe(ItemInstance(mGrinder->blockId, 1, 0), Recipes::Shape("sgs", "isi", "cic"), { Recipes::Type(Block::mBlocks[1], 's'), Recipes::Type(Item::mItems[462], 'g'), Recipes::Type(Item::mItems[265], 'i'), Recipes::Type(Block::mBlocks[4], 'c')});
-
 }
 
 void Mechanics::initBlockEntities()

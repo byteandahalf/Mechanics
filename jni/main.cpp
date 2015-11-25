@@ -16,6 +16,7 @@
 #include "MCPE/locale/I18n.h"
 #include "MCPE/world/item/Item.h"
 #include "MCPE/world/level/block/Block.h"
+#include "MCPE/world/recipes/Recipes.h"
 
 #include "Mechanics.h"
 #include "Mechanics/blocks/entity/BarrelEntity.h"
@@ -29,6 +30,8 @@ void MinecraftClient$init(MinecraftClient* minecraftClient)
 	mechanics = new Mechanics();
 
 	_MinecraftClient$init(minecraftClient);
+
+	mechanics->initRecipies();
 }
 
 void (*_Item$initItems)();
@@ -81,7 +84,10 @@ void SurvivalInventoryScreen$_updateCraftableItems(SurvivalInventoryScreen* scre
 	if(registered)
 		return;
 
-	mechanics->initRecipies();
+	//Crafting Table Recipes
+	Recipes::getInstance()->addShapedRecipe(ItemInstance(Mechanics::mBarrel->blockId, 1, 0), Recipes::Shape("wsw", "w w", "www"), { Recipes::Type(Block::mBlocks[17], 'w'), Recipes::Type(Item::mItems[158], 's')}); // Barrel Recipes
+	Recipes::getInstance()->addShapedRecipe(ItemInstance(Mechanics::mGrinder->blockId, 1, 0), Recipes::Shape("sgs", "isi", "cic"), { Recipes::Type(Block::mBlocks[1], 's'), Recipes::Type(Item::mItems[462], 'g'), Recipes::Type(Item::mItems[265], 'i'), Recipes::Type(Block::mBlocks[4], 'c')}); // Grinder Recipe
+	//Recipes::getInstance()->addShapedRecipe(ItemInstance(Mechanics::mWoodenGear->itemId, 1, 0), Recipes::Shape(" s ", "s s", " s "), { Recipes::Type(Item::mItems[280], 's')}); // Wooden Gear Recipe
 	registered = true;
 }
 
