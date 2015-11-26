@@ -37,9 +37,9 @@ void MinecraftClient$init(MinecraftClient* minecraftClient)
 void (*_Item$initItems)();
 void Item$initItems()
 {
-	_Item$initItems();
-
 	mechanics->initItems();
+
+	_Item$initItems();
 }
 
 void (*_Block$initBlocks)();

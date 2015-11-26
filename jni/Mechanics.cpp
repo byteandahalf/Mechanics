@@ -48,9 +48,9 @@ void Mechanics::initItems()
 {
 	//Init Item
 	//Item::mItems[300] = mCable =  nullptr;
-	Item::mItems[460] = mIronDust = new IronDustItem(460);
-	Item::mItems[461] = mGoldDust = new GoldDustItem(461);
-	Item::mItems[462] = mWoodenGear = new WoodenGearItem(462);
+	Item::mItems[490] = mIronDust = new IronDustItem(490 - 0x100);
+	Item::mItems[491] = mGoldDust = new GoldDustItem(491 - 0x100);
+	Item::mItems[492] = mWoodenGear = new WoodenGearItem(492 - 0x100);
 	//Item::mItems[300] = mWrench = nullptr;
 }
 
@@ -70,9 +70,9 @@ void Mechanics::initCreativeItems()
 	Item::addCreativeItem(mWoodenCrank, 0);
 
 	//Items
-	//Item::addCreativeItem(mWoodenGear, 0);
-	//Item::addCreativeItem(mIronDust, 0);
-	//Item::addCreativeItem(mGoldDust, 0);
+	Item::addCreativeItem(mWoodenGear, 0);
+	Item::addCreativeItem(mIronDust, 0);
+	Item::addCreativeItem(mGoldDust, 0);
 }
 
 void Mechanics::initRecipies()
